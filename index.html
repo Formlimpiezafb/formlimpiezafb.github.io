@@ -150,3 +150,134 @@
           <option>LV-KHO</option>
           <option>LV-KJD</option>
           <option>LV-KJE</option>
+          <option>LV-KJF</option>
+          <option>LY-MLG</option>
+          <option>LY-MLJ</option>
+          <option>LY-VEL</option>
+        </select>
+
+        <label>POSICIÓN DE LA AERONAVE:</label>
+        <input type="text" name="posicion" required />
+
+        <label>Tipo de Limpieza:</label>
+        <select name="tipo_limpieza" required>
+          <option value="">Seleccione un tipo</option>
+          <option>LIMPIEZA SUPERFICIAL</option>
+          <option>LIMPIEZA PROFUNDA</option>
+          <option>LIMPIEZA PLUS</option>
+        </select>
+
+        <label>Hora de inicio de limpieza:</label>
+        <input type="time" name="hora_inicio" required />
+
+        <label>Hora de finalización de limpieza:</label>
+        <input type="time" name="hora_finalizacion" required />
+
+        <label>Estado de la Limpieza:</label>
+        <div class="estado-limpieza">
+          <label class="radio-option">
+            <input type="radio" name="estado_limpieza" value="CONFORME" required />
+            LIMPIEZA CONFORME
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="estado_limpieza" value="NO CONFORME" />
+            LIMPIEZA NO CONFORME
+          </label>
+        </div>
+
+        <label>Observaciones:</label>
+        <textarea name="observaciones" rows="4"></textarea>
+
+        <label>Responsable de Limpieza:</label>
+        <input type="text" name="responsable_limpieza" required />
+
+        <label>Responsable que recibe la aeronave limpia:</label>
+        <input type="text" name="responsable_recibe" required />
+
+        <div class="firma-container">
+          <div class="firma-box">
+            <label>Firma Responsable de Limpieza:</label>
+            <canvas id="firma1" width="300" height="150"></canvas>
+            <button type="button" onclick="limpiarFirma('firma1')">Limpiar Firma</button>
+          </div>
+          <div class="firma-box">
+            <label>Firma Responsable que recibe:</label>
+            <canvas id="firma2" width="300" height="150"></canvas>
+            <button type="button" onclick="limpiarFirma('firma2')">Limpiar Firma</button>
+          </div>
+        </div>
+
+        <!-- CAMPO PARA ADJUNTAR ARCHIVOS -->
+        <label>Adjuntar archivos:</label>
+        <input type="file" name="archivos" id="archivos" multiple />
+
+        <input type="submit" value="Enviar" />
+      </form>
+    </div>
+
+    <script>
+      function setupCanvas(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        canvas.addEventListener('pointerdown', e => {
+          isDrawing = true;
+          ctx.beginPath();
+          ctx.moveTo(e.offsetX, e.offsetY);
+        });
+
+        canvas.addEventListener('pointermove', e => {
+          if (isDrawing) {
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+          }
+        });
+
+        canvas.addEventListener('pointerup', () => isDrawing = false);
+        canvas.addEventListener('pointerleave', () => isDrawing = false);
+      }
+
+      function limpiarFirma(id) {
+        const canvas = document.getElementById(id);
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
+      setupCanvas('firma1');
+      setupCanvas('firma2');
+
+      document.getElementById('cleaningForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const form = e.target;
+        const archivos = document.getElementById('archivos').files;
+        const formData = new FormData();
+
+        formData.append('fecha', form.fecha.value);
+        formData.append('aeronave', form.aeronave.value);
+        formData.append('posicion', form.posicion.value);
+        formData.append('tipo_limpieza', form.tipo_limpieza.value);
+        formData.append('hora_inicio', form.hora_inicio.value);
+        formData.append('hora_finalizacion', form.hora_finalizacion.value);
+        formData.append('estado_limpieza', form.estado_limpieza.value);
+        formData.append('observaciones', form.observaciones.value);
+        formData.append('responsable_limpieza', form.responsable_limpieza.value);
+        formData.append('responsable_recibe', form.responsable_recibe.value);
+        formData.append('firma1', document.getElementById('firma1').toDataURL());
+        formData.append('firma2', document.getElementById('firma2').toDataURL());
+
+        for (let i = 0; i < archivos.length; i++) {
+          formData.append('archivos[]', archivos[i]);
+        }
+
+        fetch('https://script.google.com/macros/s/AKfycbx7TLEbeHoq-38EG_l2tsHEPW415h70VHyc_6l3VaUTyhV5cbd-9LFaxBDPFQqdwg4ptQ/exec', {
+          method: 'POST',
+          body: formData,
+        })
+        .then(res => res.text())
+        .then(msg => alert(msg))
+        .catch(err => alert('Error: ' + err));
+      });
+    </script>
+  </body>
+</html>
