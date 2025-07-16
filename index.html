@@ -33,6 +33,7 @@
 .radio-option input {
   margin-right: 8px;
 }
+
       body {
         font-family: Arial, sans-serif;
         background-color: #FDBE15;
@@ -170,9 +171,9 @@
         <input type="time" name="hora_inicio" required />
 
         <label>Hora de finalización de limpieza:</label>
-        <input type="time" name="hora_finalizacion" required />
+<input type="time" name="hora_finalizacion" required />
 
-        <!-- NUEVO BLOQUE: ESTADO DE LIMPIEZA -->
+<!-- NUEVO BLOQUE: ESTADO DE LIMPIEZA -->
 <label>Estado de la Limpieza:</label>
 <div class="estado-limpieza">
   <label class="radio-option">
@@ -199,10 +200,11 @@
             <label>Firma Responsable que recibe:</label>
             <canvas id="firma2" width="300" height="150"></canvas>
             <button type="button" onclick="limpiarFirma('firma2')">Limpiar Firma</button>
-             <label>Observaciones:</label>
-        <textarea name="observaciones" rows="4"></textarea>
           </div>
         </div>
+
+        <label>Observaciones:</label>
+        <textarea name="observaciones" rows="4"></textarea>
 
         <input type="submit" value="Enviar" />
       </form>
@@ -243,8 +245,8 @@
       document.getElementById('cleaningForm').addEventListener('submit', e => {
         e.preventDefault();
         const form = e.target;
-      const data = {
-  fecha: form.fecha.value,
+        const data = {
+          fecha: form.fecha.value,
   aeronave: form.aeronave.value,
   posicion: form.posicion.value,
   tipo_limpieza: form.tipo_limpieza.value,
