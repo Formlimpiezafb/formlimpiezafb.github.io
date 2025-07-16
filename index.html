@@ -8,7 +8,31 @@
       * {
         box-sizing: border-box;
       }
+.estado-limpieza {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
 
+.radio-option {
+  background-color: #f0f0f0;
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  font-weight: bold;
+  transition: border-color 0.3s ease;
+}
+
+.radio-option:hover {
+  border-color: #FDBE15;
+}
+
+.radio-option input {
+  margin-right: 8px;
+}
       body {
         font-family: Arial, sans-serif;
         background-color: #FDBE15;
@@ -148,9 +172,17 @@
         <label>Hora de finalización de limpieza:</label>
         <input type="time" name="hora_finalizacion" required />
 
-        <label>Observaciones:</label>
-        <textarea name="observaciones" rows="4"></textarea>
-
+        <!-- NUEVO BLOQUE: ESTADO DE LIMPIEZA -->
+<label>Estado de la Limpieza:</label>
+<div class="estado-limpieza">
+  <label class="radio-option">
+    <input type="radio" name="estado_limpieza" value="CONFORME" required />
+    LIMPIEZA CONFORME
+  </label>
+  <label class="radio-option">
+    <input type="radio" name="estado_limpieza" value="NO CONFORME" />
+    LIMPIEZA NO CONFORME
+  </label>
         <label>Responsable de Limpieza:</label>
         <input type="text" name="responsable_limpieza" required />
 
@@ -167,6 +199,8 @@
             <label>Firma Responsable que recibe:</label>
             <canvas id="firma2" width="300" height="150"></canvas>
             <button type="button" onclick="limpiarFirma('firma2')">Limpiar Firma</button>
+             <label>Observaciones:</label>
+        <textarea name="observaciones" rows="4"></textarea>
           </div>
         </div>
 
@@ -209,18 +243,19 @@
       document.getElementById('cleaningForm').addEventListener('submit', e => {
         e.preventDefault();
         const form = e.target;
-        const data = {
-          fecha: form.fecha.value,
-          aeronave: form.aeronave.value,
-          posicion: form.posicion.value,
-          tipo_limpieza: form.tipo_limpieza.value,
-          hora_inicio: form.hora_inicio.value, // NUEVO CAMPO
-          hora_finalizacion: form.hora_finalizacion.value,       // NUEVO CAMPO
-          observaciones: form.observaciones.value,
-          responsable_limpieza: form.responsable_limpieza.value,
-          responsable_recibe: form.responsable_recibe.value,
-          firma1: document.getElementById('firma1').toDataURL(),
-          firma2: document.getElementById('firma2').toDataURL()
+      const data = {
+  fecha: form.fecha.value,
+  aeronave: form.aeronave.value,
+  posicion: form.posicion.value,
+  tipo_limpieza: form.tipo_limpieza.value,
+  hora_inicio: form.hora_inicio.value,
+  hora_finalizacion: form.hora_finalizacion.value,
+  estado_limpieza: form.estado_limpieza.value, // nuevo campo agregado
+  observaciones: form.observaciones.value,
+  responsable_limpieza: form.responsable_limpieza.value,
+  responsable_recibe: form.responsable_recibe.value,
+  firma1: document.getElementById('firma1').toDataURL(),
+  firma2: document.getElementById('firma2').toDataURL()
         };
 
         fetch('https://script.google.com/macros/s/AKfycbx7TLEbeHoq-38EG_l2tsHEPW415h70VHyc_6l3VaUTyhV5cbd-9LFaxBDPFQqdwg4ptQ/exec', {
