@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formularios Pendientes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff3b4;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f6c100;
+    }
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h2>Formularios Pendientes</h2>
+  <table id="tabla-pendientes">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Aeronave</th>
+        <th>Tipo</th>
+        <th>Inicio</th>
+        <th>Estado</th>
+        <th>Responsable</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    fetch('https://script.google.com/macros/s/TU_SCRIPT_ID/exec?modo=pendientes')
+      .then(r => r.json())
+      .then(datos => {
+        const tbody = document.querySelector('#tabla-pendientes tbody');
+        datos.forEach(fila => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${fila.fecha}</td>
+            <td>${fila.aeronave}</td>
+            <td>${fila.tipo_limpieza}</td>
+            <td>${fila.hora_inicio}</td>
+            <td>${fila.estado_limpieza}</td>
+            <td>${fila.responsable_limpieza}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+  </script>
+</body>
+</html>
