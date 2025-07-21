@@ -51,6 +51,16 @@
       white-space: nowrap;
     }
 
+    /* NUEVO: clase para persona con carrito */
+    .cleaner {
+      position: absolute;
+      font-size: 28px;
+      opacity: 0.9;
+      z-index: 3;
+      white-space: nowrap;
+      user-select: none;
+    }
+
     .container {
       background-color: #fffde6;
       padding: 40px 30px;
@@ -179,13 +189,80 @@
   }
 </script>
 
+<!-- NUEVO: PERSONAS CON CARRITO DE LIMPIEZA -->
+<script>
+  const numCleaners = 8; // cantidad de personas con carrito
+  const directions = ['left-right', 'right-left', 'top-down', 'bottom-up'];
+
+  for (let i = 0; i < numCleaners; i++) {
+    const cleaner = document.createElement('div');
+    cleaner.classList.add('cleaner');
+
+    // Emoji persona + carrito de limpieza
+    cleaner.textContent = '👨‍🔧🧹';
+
+    const direction = directions[Math.floor(Math.random() * directions.length)];
+    const duration = 15 + Math.random() * 20;
+    const size = 18 + Math.random() * 15;
+
+    cleaner.style.fontSize = `${size}px`;
+    cleaner.style.animationDuration = `${duration}s`;
+    cleaner.style.animationTimingFunction = 'linear';
+    cleaner.style.animationIterationCount = 'infinite';
+
+    if (direction === 'left-right') {
+      cleaner.style.top = `${Math.random() * 90}vh`;
+      cleaner.style.left = '-15vw';
+      cleaner.style.transform = 'rotate(0deg)';
+      cleaner.style.animationName = `cleanerFlyLR${i}`;
+    } else if (direction === 'right-left') {
+      cleaner.style.top = `${Math.random() * 90}vh`;
+      cleaner.style.left = '100vw';
+      cleaner.style.transform = 'rotate(180deg)';
+      cleaner.style.animationName = `cleanerFlyRL${i}`;
+    } else if (direction === 'top-down') {
+      cleaner.style.left = `${Math.random() * 100}vw`;
+      cleaner.style.top = '-15vh';
+      cleaner.style.transform = 'rotate(90deg)';
+      cleaner.style.animationName = `cleanerFlyTD${i}`;
+    } else if (direction === 'bottom-up') {
+      cleaner.style.left = `${Math.random() * 100}vw`;
+      cleaner.style.top = '100vh';
+      cleaner.style.transform = 'rotate(-90deg)';
+      cleaner.style.animationName = `cleanerFlyBU${i}`;
+    }
+
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes cleanerFlyLR${i} {
+        0% { transform: translateX(0) rotate(0deg); }
+        100% { transform: translateX(115vw) rotate(0deg); }
+      }
+      @keyframes cleanerFlyRL${i} {
+        0% { transform: translateX(0) rotate(180deg); }
+        100% { transform: translateX(-115vw) rotate(180deg); }
+      }
+      @keyframes cleanerFlyTD${i} {
+        0% { transform: translateY(0) rotate(90deg); }
+        100% { transform: translateY(115vh) rotate(90deg); }
+      }
+      @keyframes cleanerFlyBU${i} {
+        0% { transform: translateY(0) rotate(-90deg); }
+        100% { transform: translateY(-115vh) rotate(-90deg); }
+      }
+    `;
+    document.head.appendChild(style);
+    document.body.appendChild(cleaner);
+  }
+</script>
+
 <!-- UI PRINCIPAL -->
 <div class="container">
   <img src="https://i.imgur.com/evesmtC.png" alt="Logo" class="logo" />
   <h1>Control de Limpieza de Aeronaves</h1>
-<a href="Completados.html" class="btn">🗂 Formularios Completados</a>
-<a href="Pendientes.html" class="btn">⏳ Formularios Pendientes</a>
-<a href="nuevo-formulario.html" class="btn">📝 Iniciar Nuevo Formulario</a>
+  <a href="Completados.html" class="btn">🗂 Formularios Completados</a>
+  <a href="Pendientes.html" class="btn">⏳ Formularios Pendientes</a>
+  <a href="nuevo-formulario.html" class="btn">📝 Iniciar Nuevo Formulario</a>
 </div>
 
 </body>
