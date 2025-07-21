@@ -271,9 +271,9 @@
         }
 
        fetch('https://script.google.com/macros/s/AKfycbzidnWfeXQxcGQWt7EEY4Wtxo3mK8_s_xQMe88FAKpwOkNwVqX0GS-sVPnII74424he/exec', {
-          method: 'POST',
-          body: formData,
-        })
+  method: 'POST',
+  body: formData
+})
         .then(res => res.text())
         .then(msg => alert(msg))
         .catch(err => alert('Error: ' + err));
