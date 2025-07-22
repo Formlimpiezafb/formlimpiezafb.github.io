@@ -48,24 +48,26 @@
     <tbody></tbody>
   </table>
 
-  <script>
+ <script>
 fetch('https://script.google.com/macros/s/AKfycbxaxuLGXvIC_9-WHTJOhiZjIFpSCWEQx_7CVIDDfY83a0IJdX8DwHAzHR9KlA_dN6Kc/exec?modo=pendiente')
-      .then(r => r.json())
-      .then(datos => {
-        const tbody = document.querySelector('#tabla-pendientes tbody');
-        datos.forEach(fila => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${fila.fecha}</td>
-            <td>${fila.aeronave}</td>
-            <td>${fila.tipo_limpieza}</td>
-            <td>${fila.hora_inicio}</td>
-            <td>${fila.estado_limpieza}</td>
-            <td>${fila.responsable_limpieza}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      });
-  </script>
+  .then(r => r.json())
+  .then(datos => {
+    const tbody = document.querySelector('#tabla-pendientes tbody');
+    datos.forEach(fila => {
+      if (!fila.firma_limpieza || !fila.firma_recepcion) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${fila.fecha}</td>
+          <td>${fila.aeronave}</td>
+          <td>${fila.tipo_limpieza}</td>
+          <td>${fila.hora_inicio}</td>
+          <td>${fila.estado_limpieza}</td>
+          <td>${fila.responsable_limpieza}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    });
+  });
+</script>
 </body>
 </html>
