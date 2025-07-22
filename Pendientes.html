@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Formularios Pendientes</title>
+  <title>Formularios Incompletos</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -36,7 +36,7 @@
   </style>
 </head>
 <body>
-  <h2>Formularios Pendientes</h2>
+  <h2>Formularios Incompletos (faltan firmas)</h2>
   <table id="tabla-completados">
     <thead>
       <tr>
@@ -51,6 +51,7 @@
         <th>Receptor</th>
         <th>Observaciones</th>
         <th>PDF</th>
+        <th>Firmas Faltantes</th> <!-- nueva columna -->
       </tr>
     </thead>
     <tbody></tbody>
@@ -62,8 +63,8 @@
       .then(datos => {
         const tbody = document.querySelector('#tabla-completados tbody');
         datos.forEach(fila => {
-          // Mostrar solo si ambas firmas están presentes
-        if (!(fila.responsable_limpieza && fila.responsable_recibe)) {
+          // Mostrar si falta una o ambas firmas
+          if (!(fila.responsable_limpieza && fila.responsable_recibe)) {
             const fecha = new Date(fila.fecha);
             const horaInicio = new Date(fila.hora_inicio);
             const horaFin = new Date(fila.hora_finalizacion);
@@ -79,6 +80,16 @@
               minute: '2-digit'
             });
 
+            // Determinar qué firma falta
+            let faltante = '';
+            if (!fila.responsable_limpieza && !fila.responsable_recibe) {
+              faltante = 'Faltan ambas firmas';
+            } else if (!fila.responsable_limpieza) {
+              faltante = 'Falta firma de limpieza';
+            } else if (!fila.responsable_recibe) {
+              faltante = 'Falta firma de recepción';
+            }
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td>${fechaFormateada}</td>
@@ -92,6 +103,7 @@
               <td>${fila.responsable_recibe}</td>
               <td>${fila.obs}</td>
               <td><a href="${fila.link_pdf}" target="_blank">Ver PDF</a></td>
+              <td><strong>${faltante}</strong></td>
             `;
             tbody.appendChild(tr);
           }
