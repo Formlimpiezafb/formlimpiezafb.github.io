@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Formularios Completados</title>
+  <title>Formularios Pendientes</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -37,7 +37,7 @@
 </head>
 <body>
   <h2>Formularios Pendientes</h2>
-  <table id="tabla-completados">
+  <table id="tabla-Pendientes">
     <thead>
       <tr>
         <th>Fecha</th>
@@ -60,7 +60,7 @@
 fetch('https://script.google.com/macros/s/AKfycbw_ZigcZE-rRvh5PGkhWBH1glLcH8Iq35cWzCe7sKCgTl-KqP6Xx8gglgPHoHha4h3w/exec?modo=pendientes')
   .then(r => r.json())
   .then(datos => {
-    const tbody = document.querySelector('#tabla-completados tbody');
+    const tbody = document.querySelector('#tabla-pendientes tbody');
     datos.forEach(fila => {
       // Filtro: mostrar solo si ambas firmas están presentes
       if (fila.firma_limpieza || fila.firma_recepcion) {
