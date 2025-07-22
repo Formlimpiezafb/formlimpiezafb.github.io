@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Formularios Pendientes</title>
+  <title>Formularios Completados</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -36,8 +36,8 @@
   </style>
 </head>
 <body>
-  <h2>Formularios Pendientes</h2>
-  <table id="tabla-Pendientes">
+  <h2>Formularios Completados</h2>
+  <table id="tabla-completados">
     <thead>
       <tr>
         <th>Fecha</th>
@@ -57,46 +57,46 @@
   </table>
 
   <script>
-fetch('https://script.google.com/macros/s/AKfycbw_ZigcZE-rRvh5PGkhWBH1glLcH8Iq35cWzCe7sKCgTl-KqP6Xx8gglgPHoHha4h3w/exec?modo=pendientes')
-  .then(r => r.json())
-  .then(datos => {
-    const tbody = document.querySelector('#tabla-pendientes tbody');
-    datos.forEach(fila => {
-      // Filtro: mostrar solo si ambas firmas están presentes
-    if (!(fila.responsable_limpieza && fila.responsable_recibe)) {
-        const fecha = new Date(fila.fecha);
-        const horaInicio = new Date(fila.hora_inicio);
-        const horaFin = new Date(fila.hora_finalizacion);
+    fetch('https://script.google.com/macros/s/AKfycbxaxuLGXvIC_9-WHTJOhiZjIFpSCWEQx_7CVIDDfY83a0IJdX8DwHAzHR9KlA_dN6Kc/exec?modo=completados')
+      .then(r => r.json())
+      .then(datos => {
+        const tbody = document.querySelector('#tabla-completados tbody');
+        datos.forEach(fila => {
+          // Mostrar solo si ambas firmas están presentes
+        if (!(fila.responsable_limpieza && fila.responsable_recibe)) {
+            const fecha = new Date(fila.fecha);
+            const horaInicio = new Date(fila.hora_inicio);
+            const horaFin = new Date(fila.hora_finalizacion);
 
-        const fechaFormateada = fecha.toLocaleDateString('es-AR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
+            const fechaFormateada = fecha.toLocaleDateString('es-AR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            });
+
+            const horaFormateada = hora => hora.toLocaleTimeString('es-AR', {
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${fechaFormateada}</td>
+              <td>${fila.aeronave}</td>
+              <td>${fila.posicion}</td>
+              <td>${fila.tipo_limpieza}</td>
+              <td>${horaFormateada(horaInicio)}</td>
+              <td>${horaFormateada(horaFin)}</td>
+              <td>${fila.estado_limpieza}</td>
+              <td>${fila.responsable_limpieza}</td>
+              <td>${fila.responsable_recibe}</td>
+              <td>${fila.obs}</td>
+              <td><a href="${fila.link_pdf}" target="_blank">Ver PDF</a></td>
+            `;
+            tbody.appendChild(tr);
+          }
         });
-
-        const horaFormateada = hora => hora.toLocaleTimeString('es-AR', {
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${fechaFormateada}</td>
-          <td>${fila.aeronave}</td>
-          <td>${fila.posicion}</td>
-          <td>${fila.tipo_limpieza}</td>
-          <td>${horaFormateada(horaInicio)}</td>
-          <td>${horaFormateada(horaFin)}</td>
-          <td>${fila.estado_limpieza}</td>
-          <td>${fila.responsable_limpieza}</td>
-          <td>${fila.responsable_recibe}</td>
-          <td>${fila.obs}</td>
-          <td><a href="${fila.link_pdf}" target="_blank">Ver PDF</a></td>
-        `;
-        tbody.appendChild(tr);
-      }
-    });
-  });
-</script>
+      });
+  </script>
 </body>
 </html>
