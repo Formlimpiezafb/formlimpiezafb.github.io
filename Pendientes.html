@@ -63,7 +63,7 @@ fetch('https://script.google.com/macros/s/AKfycbw_ZigcZE-rRvh5PGkhWBH1glLcH8Iq35
     const tbody = document.querySelector('#tabla-pendientes tbody');
     datos.forEach(fila => {
       // Filtro: mostrar solo si ambas firmas están presentes
-      if (fila.firma_limpieza || fila.firma_recepcion) {
+    if (!(fila.responsable_limpieza && fila.responsable_recibe)) {
         const fecha = new Date(fila.fecha);
         const horaInicio = new Date(fila.hora_inicio);
         const horaFin = new Date(fila.hora_finalizacion);
