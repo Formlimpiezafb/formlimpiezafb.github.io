@@ -57,28 +57,43 @@
   </table>
 
   <script>
-    fetch('https://script.google.com/macros/s/AKfycbxaxuLGXvIC_9-WHTJOhiZjIFpSCWEQx_7CVIDDfY83a0IJdX8DwHAzHR9KlA_dN6Kc/exec?modo=completados')
-      .then(r => r.json())
-      .then(datos => {
-        const tbody = document.querySelector('#tabla-completados tbody');
-        datos.forEach(fila => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${fila.fecha}</td>
-            <td>${fila.aeronave}</td>
-            <td>${fila.posicion}</td>
-            <td>${fila.tipo_limpieza}</td>
-            <td>${fila.hora_inicio}</td>
-            <td>${fila.hora_finalizacion}</td>
-            <td>${fila.estado_limpieza}</td>
-            <td>${fila.responsable_limpieza}</td>
-            <td>${fila.responsable_recibe}</td>
-            <td>${fila.obs}</td>
-            <td><a href="${fila.link_pdf}" target="_blank">Ver PDF</a></td>
-          `;
-          tbody.appendChild(tr);
+  fetch('https://script.google.com/macros/s/AKfycbxaxuLGXvIC_9-WHTJOhiZjIFpSCWEQx_7CVIDDfY83a0IJdX8DwHAzHR9KlA_dN6Kc/exec?modo=completados')
+    .then(r => r.json())
+    .then(datos => {
+      const tbody = document.querySelector('#tabla-completados tbody');
+      datos.forEach(fila => {
+        const fecha = new Date(fila.fecha);
+        const horaInicio = new Date(fila.hora_inicio);
+        const horaFin = new Date(fila.hora_finalizacion);
+
+        const fechaFormateada = fecha.toLocaleDateString('es-AR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
         });
+
+        const horaFormateada = hora => hora.toLocaleTimeString('es-AR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${fechaFormateada}</td>
+          <td>${fila.aeronave}</td>
+          <td>${fila.posicion}</td>
+          <td>${fila.tipo_limpieza}</td>
+          <td>${horaFormateada(horaInicio)}</td>
+          <td>${horaFormateada(horaFin)}</td>
+          <td>${fila.estado_limpieza}</td>
+          <td>${fila.responsable_limpieza}</td>
+          <td>${fila.responsable_recibe}</td>
+          <td>${fila.obs}</td>
+          <td><a href="${fila.link_pdf}" target="_blank">Ver PDF</a></td>
+        `;
+        tbody.appendChild(tr);
       });
-  </script>
+    });
+</script>
 </body>
 </html>
