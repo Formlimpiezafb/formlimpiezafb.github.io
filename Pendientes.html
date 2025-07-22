@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Formularios Pendientes</title>
+  <title>Formularios Completados</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #fff3b4;
+      background-color: #fdf3b4;
       padding: 20px;
     }
     h2 {
@@ -25,44 +25,73 @@
       text-align: left;
     }
     th {
-      background-color: #f6c100;
+      background-color: #FDBE15;
     }
     tr:hover {
-      background-color: #f9f9f9;
+      background-color: #f0f0f0;
+    }
+    a {
+      color: blue;
     }
   </style>
 </head>
 <body>
-  <h2>Formularios Pendientes</h2>
-  <table id="tabla-pendientes">
+  <h2>Formularios Completados</h2>
+  <table id="tabla-completados">
     <thead>
       <tr>
         <th>Fecha</th>
         <th>Aeronave</th>
+        <th>Posición</th>
         <th>Tipo</th>
         <th>Inicio</th>
+        <th>Fin</th>
         <th>Estado</th>
         <th>Responsable</th>
+        <th>Receptor</th>
+        <th>Observaciones</th>
+        <th>PDF</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
- <script>
-fetch('https://script.google.com/macros/s/AKfycbxaxuLGXvIC_9-WHTJOhiZjIFpSCWEQx_7CVIDDfY83a0IJdX8DwHAzHR9KlA_dN6Kc/exec?modo=pendiente')
+  <script>
+fetch('https://script.google.com/macros/s/AKfycbxaxuLGXvIC_9-WHTJOhiZjIFpSCWEQx_7CVIDDfY83a0IJdX8DwHAzHR9KlA_dN6Kc/exec?modo=completados')
   .then(r => r.json())
   .then(datos => {
-    const tbody = document.querySelector('#tabla-pendientes tbody');
+    const tbody = document.querySelector('#tabla-completados tbody');
     datos.forEach(fila => {
-      if (!fila.firma_limpieza || !fila.firma_recepcion) {
+      // Filtro: mostrar solo si ambas firmas están presentes
+      if (fila.firma_limpieza || fila.firma_recepcion) {
+        const fecha = new Date(fila.fecha);
+        const horaInicio = new Date(fila.hora_inicio);
+        const horaFin = new Date(fila.hora_finalizacion);
+
+        const fechaFormateada = fecha.toLocaleDateString('es-AR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+
+        const horaFormateada = hora => hora.toLocaleTimeString('es-AR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${fila.fecha}</td>
+          <td>${fechaFormateada}</td>
           <td>${fila.aeronave}</td>
+          <td>${fila.posicion}</td>
           <td>${fila.tipo_limpieza}</td>
-          <td>${fila.hora_inicio}</td>
+          <td>${horaFormateada(horaInicio)}</td>
+          <td>${horaFormateada(horaFin)}</td>
           <td>${fila.estado_limpieza}</td>
           <td>${fila.responsable_limpieza}</td>
+          <td>${fila.responsable_recibe}</td>
+          <td>${fila.obs}</td>
+          <td><a href="${fila.link_pdf}" target="_blank">Ver PDF</a></td>
         `;
         tbody.appendChild(tr);
       }
