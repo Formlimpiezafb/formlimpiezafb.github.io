@@ -131,6 +131,8 @@
       <h2>FORMULARIO DE LIMPIEZA DE AERONAVE</h2>
 
       <form id="cleaningForm">
+        <input type="hidden" name="formulario_id" id="formulario_id" />
+
         <label>Fecha:</label>
         <input type="date" name="fecha" required />
 
@@ -207,7 +209,6 @@
           </div>
         </div>
 
-        <!-- CAMPO PARA ADJUNTAR ARCHIVOS -->
         <label>Adjuntar archivos:</label>
         <input type="file" name="archivos" id="archivos" multiple />
 
@@ -253,6 +254,7 @@
         const archivos = document.getElementById('archivos').files;
         const formData = new FormData();
 
+        formData.append('formulario_id', form.formulario_id.value);
         formData.append('fecha', form.fecha.value);
         formData.append('aeronave', form.aeronave.value);
         formData.append('posicion', form.posicion.value);
@@ -270,14 +272,75 @@
           formData.append('archivos[]', archivos[i]);
         }
 
-       fetch('https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec', {
-  method: 'POST',
-  body: formData
-})
-        .then(res => res.text())
-        .then(msg => alert(msg))
-        .catch(err => alert('Error: ' + err));
+        fetch('https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec', {
+          method: 'POST',
+          body: formData
+        })
+          .then(res => res.text())
+          .then(msg => alert(msg))
+          .catch(err => alert('Error: ' + err));
+      });
+
+      function getQueryParam(param) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(param);
+      }
+
+      function cargarFormulario(data) {
+        const form = document.getElementById("cleaningForm");
+
+        for (const [key, value] of Object.entries(data)) {
+          const campo = form.elements[key];
+          if (campo) {
+            if (campo.type === "radio") {
+              const radios = form.querySelectorAll(`input[name="${key}"]`);
+              radios.forEach(radio => {
+                if (radio.value === value) radio.checked = true;
+                if (value) radio.disabled = true;
+              });
+            } else {
+              campo.value = value;
+              if (value && key !== "responsable_recibe" && key !== "firma2") {
+                campo.disabled = true;
+              }
+            }
+          }
+        }
+
+        if (data.firma1) {
+          const canvas1 = document.getElementById("firma1");
+          const ctx1 = canvas1.getContext("2d");
+          const img1 = new Image();
+          img1.onload = () => ctx1.drawImage(img1, 0, 0);
+          img1.src = data.firma1;
+          canvas1.style.pointerEvents = "none";
+        }
+
+        if (data.firma2) {
+          const canvas2 = document.getElementById("firma2");
+          const ctx2 = canvas2.getContext("2d");
+          const img2 = new Image();
+          img2.onload = () => ctx2.drawImage(img2, 0, 0);
+          img2.src = data.firma2;
+          canvas2.style.pointerEvents = "none";
+        }
+
+        if (data.firma1 && data.firma2) {
+          Array.from(form.elements).forEach(el => el.disabled = true);
+          document.querySelectorAll("canvas").forEach(c => c.style.pointerEvents = "none");
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        const id = getQueryParam("id");
+        if (id) {
+          document.getElementById("formulario_id").value = id;
+          fetch(`https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec?formulario_id=${id}`)
+            .then(res => res.json())
+            .then(data => cargarFormulario(data))
+            .catch(err => console.error("Error al cargar datos:", err));
+        }
       });
     </script>
   </body>
-</html> 
+</html>
