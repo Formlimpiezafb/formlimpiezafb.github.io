@@ -1,3 +1,4 @@
+<!-- FORMULARIO DE LIMPIEZA - HTML COMPATIBLE CON APPS SCRIPT -->
 <!DOCTYPE html>
 <html lang="es">
   <head>
@@ -8,7 +9,6 @@
       * {
         box-sizing: border-box;
       }
-
       .estado-limpieza {
         display: flex;
         gap: 20px;
@@ -16,7 +16,6 @@
         margin-bottom: 10px;
         flex-wrap: wrap;
       }
-
       .radio-option {
         background-color: #f0f0f0;
         padding: 10px 15px;
@@ -26,15 +25,12 @@
         font-weight: bold;
         transition: border-color 0.3s ease;
       }
-
       .radio-option:hover {
         border-color: #FDBE15;
       }
-
       .radio-option input {
         margin-right: 8px;
       }
-
       body {
         font-family: Arial, sans-serif;
         background-color: #FDBE15;
@@ -44,7 +40,6 @@
         justify-content: center;
         min-height: 100vh;
       }
-
       .container {
         width: 100%;
         max-width: 700px;
@@ -53,18 +48,15 @@
         border-radius: 10px;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
       }
-
       h2 {
         text-align: center;
         margin-top: 0;
       }
-
       label {
         font-weight: bold;
         display: block;
         margin-top: 15px;
       }
-
       textarea,
       input,
       select {
@@ -74,15 +66,12 @@
         border: 1px solid #ccc;
         border-radius: 4px;
       }
-
       .firma-container {
         margin-top: 15px;
       }
-
       .firma-box {
         width: 100%;
       }
-
       canvas {
         width: 100%;
         height: auto;
@@ -90,14 +79,12 @@
         border: 1px solid #000;
         touch-action: none;
       }
-
       img.logo {
         display: block;
         max-width: 100%;
         height: auto;
         margin: 0 auto 20px;
       }
-
       input[type="submit"],
       button {
         margin-top: 20px;
@@ -108,7 +95,6 @@
         font-weight: bold;
         cursor: pointer;
       }
-
       input[type="submit"]:hover,
       button:hover {
         background-color: #e0a800;
@@ -233,13 +219,13 @@
           formData.append('archivos[]', archivos[i]);
         }
 
-        fetch('https://script.google.com/macros/s/AKfycbzbCnJtdt0K6vn7Q4nx_JwLUtIoOCQBRq9V_AM8Yyrcu0MOODGexhYPdGQvjKluqYCR/exec', {
+        fetch('https://script.google.com/macros/s/AKfycbxMP-NtE3uzpHUziacF68apPVTLtOgq-kT0Sfj41BaLIQTggIYFSjGh4-UphACn2lF0/exec', {
           method: 'POST',
           body: formData
         })
-          .then(res => res.text())
-          .then(msg => alert(msg))
-          .catch(err => alert('Error: ' + err));
+        .then(res => res.text())
+        .then(msg => alert(msg))
+        .catch(err => alert('Error: ' + err));
       });
 
       function getQueryParam(param) {
@@ -249,14 +235,11 @@
 
       function cargarFormulario(data) {
         const form = document.getElementById("cleaningForm");
-
         for (const [key, value] of Object.entries(data)) {
           const campo = form.elements[key];
           if (campo) {
             campo.value = value;
-            if (value && key !== "firma1") {
-              campo.disabled = true;
-            }
+            if (value && key !== "firma1") campo.disabled = true;
           }
         }
 
@@ -279,7 +262,7 @@
         const id = getQueryParam("id");
         if (id) {
           document.getElementById("formulario_id").value = id;
-          fetch(`https://script.google.com/macros/s/AKfycbzbCnJtdt0K6vn7Q4nx_JwLUtIoOCQBRq9V_AM8Yyrcu0MOODGexhYPdGQvjKluqYCR/exec?formulario_id=${id}`)
+          fetch(`https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec?formulario_id=${id}`)
             .then(res => res.json())
             .then(data => cargarFormulario(data))
             .catch(err => console.error("Error al cargar datos:", err));
