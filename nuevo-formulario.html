@@ -75,22 +75,22 @@
         border-radius: 4px;
       }
 
-      .firma-container {
-        margin-top: 15px;
-      }
-
-      .firma-box {
-         margin-top: 20px;
+     .firma-container {
+  margin-top: 30px;
   display: flex;
   justify-content: center;
 }
 
+.firma-box {
+  text-align: center;
+}
+
 canvas {
   display: block;
+  margin: 10px auto;
   width: 100%;
   max-width: 500px;
   height: 200px;
-  margin: 0 auto;
   border: 2px solid #000;
   touch-action: none;
 }
@@ -170,13 +170,13 @@ canvas {
         <label>Responsable de Limpieza:</label>
         <input type="text" name="responsable_limpieza" required />
 
-        <div class="firma-container">
-          <div class="firma-box">
-            <label>Firma Responsable de Limpieza:</label>
-            <canvas id="firma1" width="300" height="150"></canvas>
-            <button type="button" onclick="limpiarFirma('firma1')">Limpiar Firma</button>
-          </div>
-        </div>
+<div class="firma-container">
+  <div class="firma-box">
+    <label>Firma Responsable de Limpieza:</label>
+    <canvas id="firma1" width="500" height="200"></canvas>
+    <button type="button" onclick="limpiarFirma('firma1')">Limpiar Firma</button>
+  </div>
+</div>
 
         <label>Adjuntar archivos:</label>
         <input type="file" name="archivos" id="archivos" multiple />
