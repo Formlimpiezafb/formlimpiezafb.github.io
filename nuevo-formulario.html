@@ -218,20 +218,20 @@
         const archivos = document.getElementById('archivos').files;
         const formData = new FormData();
 
-        formData.append('formulario_id', form.formulario_id.value);
-        formData.append('fecha', form.fecha.value);
-        formData.append('aeronave', form.aeronave.value);
-        formData.append('posicion', form.posicion.value);
-        formData.append('tipo_limpieza', form.tipo_limpieza.value);
-        formData.append('hora_inicio', form.hora_inicio.value);
-        formData.append('hora_finalizacion', form.hora_finalizacion.value);
-        formData.append('observaciones', form.observaciones.value);
-        formData.append('responsable_limpieza', form.responsable_limpieza.value);
-        formData.append('firma1', document.getElementById('firma1').toDataURL());
+       formData.append('formulario_id', form.formulario_id.value);
+formData.append('fecha', form.fecha.value);
+formData.append('aeronave', form.aeronave.value);
+formData.append('posicion', form.posicion.value);
+formData.append('tipo_limpieza', form.tipo_limpieza.value);
+formData.append('hora_inicio', form.hora_inicio.value);
+formData.append('hora_finalizacion', form.hora_finalizacion.value);
+formData.append('observaciones', form.observaciones.value);
+formData.append('responsable_limpieza', form.responsable_limpieza.value);
+formData.append('firma1', document.getElementById('firma1').toDataURL());
 
-        for (let i = 0; i < archivos.length; i++) {
-          formData.append('archivos[]', archivos[i]);
-        }
+for (let i = 0; i < archivos.length; i++) {
+  formData.append('archivos[]', archivos[i]);
+}
 
         fetch('https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec', {
           method: 'POST',
