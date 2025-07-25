@@ -296,7 +296,7 @@ for (let i = 0; i < archivos.length; i++) {
         const id = getQueryParam("id");
         if (id) {
           document.getElementById("formulario_id").value = id;
-          fetch(`https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec?formulario_id=${id}`)
+          fetch(`https://script.google.com/macros/s/AKfycbzGccKEzRJ9MZxK9rsgbdbAnt2nHJFUefy9i6lvsUcyLVuIrx2vXl8y1Ude9XdH8HZA5w/exec?formulario_id=${id}`)
             .then(res => res.json())
             .then(data => cargarFormulario(data))
             .catch(err => console.error("Error al cargar datos:", err));
