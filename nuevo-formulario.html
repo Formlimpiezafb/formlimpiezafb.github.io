@@ -233,7 +233,7 @@
           formData.append('archivos[]', archivos[i]);
         }
 
-        fetch('https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec', {
+        fetch('https://script.google.com/macros/s/AKfycbzbCnJtdt0K6vn7Q4nx_JwLUtIoOCQBRq9V_AM8Yyrcu0MOODGexhYPdGQvjKluqYCR/exec', {
           method: 'POST',
           body: formData
         })
@@ -279,7 +279,7 @@
         const id = getQueryParam("id");
         if (id) {
           document.getElementById("formulario_id").value = id;
-          fetch(`https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec?formulario_id=${id}`)
+          fetch(`https://script.google.com/macros/s/AKfycbzbCnJtdt0K6vn7Q4nx_JwLUtIoOCQBRq9V_AM8Yyrcu0MOODGexhYPdGQvjKluqYCR/exec?formulario_id=${id}`)
             .then(res => res.json())
             .then(data => cargarFormulario(data))
             .catch(err => console.error("Error al cargar datos:", err));
