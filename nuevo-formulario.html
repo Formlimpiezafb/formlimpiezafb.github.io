@@ -75,24 +75,31 @@
         border-radius: 4px;
       }
 
-     .firma-container {
+.firma-container {
   margin-top: 30px;
   display: flex;
   justify-content: center;
 }
 
 .firma-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
   text-align: center;
 }
 
+.firma-box label {
+  margin-bottom: 10px;
+}
+
 canvas {
-  display: block;
-  margin: 10px auto;
   width: 100%;
-  max-width: 500px;
   height: 200px;
   border: 2px solid #000;
   touch-action: none;
+  margin-bottom: 10px;
 }
 
       img.logo {
@@ -172,8 +179,8 @@ canvas {
 
 <div class="firma-container">
   <div class="firma-box">
-    <label>Firma Responsable de Limpieza:</label>
-    <canvas id="firma1" width="500" height="200"></canvas>
+    <label for="firma1">Firma Responsable de Limpieza:</label>
+    <canvas id="firma1"></canvas>
     <button type="button" onclick="limpiarFirma('firma1')">Limpiar Firma</button>
   </div>
 </div>
