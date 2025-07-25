@@ -76,15 +76,11 @@
       }
 
       .firma-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
         margin-top: 15px;
-        justify-content: space-between;
       }
 
       .firma-box {
-        flex: 1 1 100%;
+        width: 100%;
       }
 
       canvas {
@@ -116,12 +112,6 @@
       input[type="submit"]:hover,
       button:hover {
         background-color: #e0a800;
-      }
-
-      @media (min-width: 600px) {
-        .firma-box {
-          flex: 1 1 48%;
-        }
       }
     </style>
   </head>
@@ -170,37 +160,17 @@
         <label>Hora de finalización de limpieza:</label>
         <input type="time" name="hora_finalizacion" required />
 
-        <label>Estado de la Limpieza:</label>
-        <div class="estado-limpieza">
-          <label class="radio-option">
-            <input type="radio" name="estado_limpieza" value="CONFORME" required />
-            LIMPIEZA CONFORME
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="estado_limpieza" value="NO CONFORME" />
-            LIMPIEZA NO CONFORME
-          </label>
-        </div>
-
         <label>Observaciones:</label>
         <textarea name="observaciones" rows="4"></textarea>
 
         <label>Responsable de Limpieza:</label>
         <input type="text" name="responsable_limpieza" required />
 
-        <label>Responsable que recibe la aeronave limpia:</label>
-        <input type="text" name="responsable_recibe" required />
-
         <div class="firma-container">
           <div class="firma-box">
             <label>Firma Responsable de Limpieza:</label>
             <canvas id="firma1" width="300" height="150"></canvas>
             <button type="button" onclick="limpiarFirma('firma1')">Limpiar Firma</button>
-          </div>
-          <div class="firma-box">
-            <label>Firma Responsable que recibe:</label>
-            <canvas id="firma2" width="300" height="150"></canvas>
-            <button type="button" onclick="limpiarFirma('firma2')">Limpiar Firma</button>
           </div>
         </div>
 
@@ -241,7 +211,6 @@
       }
 
       setupCanvas('firma1');
-      setupCanvas('firma2');
 
       document.getElementById('cleaningForm').addEventListener('submit', e => {
         e.preventDefault();
@@ -256,12 +225,9 @@
         formData.append('tipo_limpieza', form.tipo_limpieza.value);
         formData.append('hora_inicio', form.hora_inicio.value);
         formData.append('hora_finalizacion', form.hora_finalizacion.value);
-        formData.append('estado_limpieza', form.estado_limpieza.value);
         formData.append('observaciones', form.observaciones.value);
         formData.append('responsable_limpieza', form.responsable_limpieza.value);
-        formData.append('responsable_recibe', form.responsable_recibe.value);
         formData.append('firma1', document.getElementById('firma1').toDataURL());
-        formData.append('firma2', document.getElementById('firma2').toDataURL());
 
         for (let i = 0; i < archivos.length; i++) {
           formData.append('archivos[]', archivos[i]);
@@ -287,17 +253,9 @@
         for (const [key, value] of Object.entries(data)) {
           const campo = form.elements[key];
           if (campo) {
-            if (campo.type === "radio") {
-              const radios = form.querySelectorAll(input[name="${key}"]);
-              radios.forEach(radio => {
-                if (radio.value === value) radio.checked = true;
-                if (value) radio.disabled = true;
-              });
-            } else {
-              campo.value = value;
-              if (value && key !== "responsable_recibe" && key !== "firma2") {
-                campo.disabled = true;
-              }
+            campo.value = value;
+            if (value && key !== "firma1") {
+              campo.disabled = true;
             }
           }
         }
@@ -311,16 +269,7 @@
           canvas1.style.pointerEvents = "none";
         }
 
-        if (data.firma2) {
-          const canvas2 = document.getElementById("firma2");
-          const ctx2 = canvas2.getContext("2d");
-          const img2 = new Image();
-          img2.onload = () => ctx2.drawImage(img2, 0, 0);
-          img2.src = data.firma2;
-          canvas2.style.pointerEvents = "none";
-        }
-
-        if (data.firma1 && data.firma2) {
+        if (data.firma1) {
           Array.from(form.elements).forEach(el => el.disabled = true);
           document.querySelectorAll("canvas").forEach(c => c.style.pointerEvents = "none");
         }
@@ -330,7 +279,7 @@
         const id = getQueryParam("id");
         if (id) {
           document.getElementById("formulario_id").value = id;
-          fetch(https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec?formulario_id=${id})
+          fetch(`https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec?formulario_id=${id}`)
             .then(res => res.json())
             .then(data => cargarFormulario(data))
             .catch(err => console.error("Error al cargar datos:", err));
