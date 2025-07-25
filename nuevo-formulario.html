@@ -8,7 +8,12 @@
       * {
         box-sizing: border-box;
       }
-
+.firma-box button {
+  display: block;
+  margin-top: 10px;
+  width: 100%;
+  max-width: 200px;
+}
       .estado-limpieza {
         display: flex;
         gap: 20px;
@@ -229,7 +234,7 @@ canvas {
         const archivos = document.getElementById('archivos').files;
         const formData = new FormData();
 
-       formData.append('formulario_id', form.formulario_id.value);
+formData.append('formulario_id', form.formulario_id.value);
 formData.append('fecha', form.fecha.value);
 formData.append('aeronave', form.aeronave.value);
 formData.append('posicion', form.posicion.value);
@@ -239,6 +244,7 @@ formData.append('hora_finalizacion', form.hora_finalizacion.value);
 formData.append('observaciones', form.observaciones.value);
 formData.append('responsable_limpieza', form.responsable_limpieza.value);
 formData.append('firma1', document.getElementById('firma1').toDataURL());
+
 
 for (let i = 0; i < archivos.length; i++) {
   formData.append('archivos[]', archivos[i]);
