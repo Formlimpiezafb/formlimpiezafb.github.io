@@ -8,6 +8,7 @@
       * {
         box-sizing: border-box;
       }
+
       .estado-limpieza {
         display: flex;
         gap: 20px;
@@ -15,6 +16,7 @@
         margin-bottom: 10px;
         flex-wrap: wrap;
       }
+
       .radio-option {
         background-color: #f0f0f0;
         padding: 10px 15px;
@@ -24,12 +26,15 @@
         font-weight: bold;
         transition: border-color 0.3s ease;
       }
+
       .radio-option:hover {
         border-color: #FDBE15;
       }
+
       .radio-option input {
         margin-right: 8px;
       }
+
       body {
         font-family: Arial, sans-serif;
         background-color: #FDBE15;
@@ -39,6 +44,7 @@
         justify-content: center;
         min-height: 100vh;
       }
+
       .container {
         width: 100%;
         max-width: 700px;
@@ -47,15 +53,18 @@
         border-radius: 10px;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
       }
+
       h2 {
         text-align: center;
         margin-top: 0;
       }
+
       label {
         font-weight: bold;
         display: block;
         margin-top: 15px;
       }
+
       textarea,
       input,
       select {
@@ -65,12 +74,15 @@
         border: 1px solid #ccc;
         border-radius: 4px;
       }
+
       .firma-container {
         margin-top: 15px;
       }
+
       .firma-box {
         width: 100%;
       }
+
       canvas {
         width: 100%;
         height: auto;
@@ -78,12 +90,14 @@
         border: 1px solid #000;
         touch-action: none;
       }
+
       img.logo {
         display: block;
         max-width: 100%;
         height: auto;
         margin: 0 auto 20px;
       }
+
       input[type="submit"],
       button {
         margin-top: 20px;
@@ -94,6 +108,7 @@
         font-weight: bold;
         cursor: pointer;
       }
+
       input[type="submit"]:hover,
       button:hover {
         background-color: #e0a800;
@@ -160,7 +175,7 @@
         </div>
 
         <label>Adjuntar archivos:</label>
-        <input type="file" id="archivos" multiple />
+        <input type="file" name="archivos" id="archivos" multiple />
 
         <input type="submit" value="Enviar" />
       </form>
@@ -185,8 +200,8 @@
           }
         });
 
-        canvas.addEventListener('pointerup', () => (isDrawing = false));
-        canvas.addEventListener('pointerleave', () => (isDrawing = false));
+        canvas.addEventListener('pointerup', () => isDrawing = false);
+        canvas.addEventListener('pointerleave', () => isDrawing = false);
       }
 
       function limpiarFirma(id) {
@@ -197,95 +212,77 @@
 
       setupCanvas('firma1');
 
-      document.getElementById('cleaningForm').addEventListener('submit', async e => {
+      document.getElementById('cleaningForm').addEventListener('submit', e => {
         e.preventDefault();
         const form = e.target;
+        const archivos = document.getElementById('archivos').files;
+        const formData = new FormData();
 
-        // Leer archivos y convertir a base64
-        function fileToBase64(file) {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const base64String = reader.result.split(',')[1]; // sin encabezado data:*/*;base64,
-              resolve({ name: file.name, type: file.type, base64: base64String });
-            };
-            reader.onerror = err => reject(err);
-            reader.readAsDataURL(file);
-          });
-        }
-
-        const archivosInput = document.getElementById('archivos');
-        const archivos = archivosInput.files;
-        const archivosBase64 = [];
+        formData.append('formulario_id', form.formulario_id.value);
+        formData.append('fecha', form.fecha.value);
+        formData.append('aeronave', form.aeronave.value);
+        formData.append('posicion', form.posicion.value);
+        formData.append('tipo_limpieza', form.tipo_limpieza.value);
+        formData.append('hora_inicio', form.hora_inicio.value);
+        formData.append('hora_finalizacion', form.hora_finalizacion.value);
+        formData.append('observaciones', form.observaciones.value);
+        formData.append('responsable_limpieza', form.responsable_limpieza.value);
+        formData.append('firma1', document.getElementById('firma1').toDataURL());
 
         for (let i = 0; i < archivos.length; i++) {
-          const archivoBase64 = await fileToBase64(archivos[i]);
-          archivosBase64.push(archivoBase64);
+          formData.append('archivos[]', archivos[i]);
         }
 
-        const data = {
-          formulario_id: form.formulario_id.value,
-          fecha: form.fecha.value,
-          aeronave: form.aeronave.value,
-          posicion: form.posicion.value,
-          tipo_limpieza: form.tipo_limpieza.value,
-          hora_inicio: form.hora_inicio.value,
-          hora_finalizacion: form.hora_finalizacion.value,
-          observaciones: form.observaciones.value,
-          responsable_limpieza: form.responsable_limpieza.value,
-          firma1: document.getElementById('firma1').toDataURL(),
-          archivos: archivosBase64
-        };
-
-        fetch('https://script.google.com/macros/s/AKfycbxMP-NtE3uzpHUziacF68apPVTLtOgq-kT0Sfj41BaLIQTggIYFSjGh4-UphACn2lF0/exec', {
+        fetch('https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+          body: formData
         })
           .then(res => res.text())
           .then(msg => alert(msg))
           .catch(err => alert('Error: ' + err));
       });
 
-      // Funciones para cargar formulario con firma y bloquear campos si viene con id (opcional)
       function getQueryParam(param) {
         const params = new URLSearchParams(window.location.search);
         return params.get(param);
       }
 
       function cargarFormulario(data) {
-        const form = document.getElementById('cleaningForm');
+        const form = document.getElementById("cleaningForm");
+
         for (const [key, value] of Object.entries(data)) {
           const campo = form.elements[key];
           if (campo) {
             campo.value = value;
-            if (value && key !== 'firma1') campo.disabled = true;
+            if (value && key !== "firma1") {
+              campo.disabled = true;
+            }
           }
         }
+
         if (data.firma1) {
-          const canvas1 = document.getElementById('firma1');
-          const ctx1 = canvas1.getContext('2d');
+          const canvas1 = document.getElementById("firma1");
+          const ctx1 = canvas1.getContext("2d");
           const img1 = new Image();
           img1.onload = () => ctx1.drawImage(img1, 0, 0);
           img1.src = data.firma1;
-          canvas1.style.pointerEvents = 'none';
+          canvas1.style.pointerEvents = "none";
         }
+
         if (data.firma1) {
-          Array.from(form.elements).forEach(el => (el.disabled = true));
-          document.querySelectorAll('canvas').forEach(c => (c.style.pointerEvents = 'none'));
+          Array.from(form.elements).forEach(el => el.disabled = true);
+          document.querySelectorAll("canvas").forEach(c => c.style.pointerEvents = "none");
         }
       }
 
-      window.addEventListener('DOMContentLoaded', () => {
-        const id = getQueryParam('id');
+      window.addEventListener("DOMContentLoaded", () => {
+        const id = getQueryParam("id");
         if (id) {
-          document.getElementById('formulario_id').value = id;
-          fetch(
-            `https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec?formulario_id=${id}`
-          )
+          document.getElementById("formulario_id").value = id;
+          fetch(https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec?formulario_id=${id})
             .then(res => res.json())
             .then(data => cargarFormulario(data))
-            .catch(err => console.error('Error al cargar datos:', err));
+            .catch(err => console.error("Error al cargar datos:", err));
         }
       });
     </script>
