@@ -8,12 +8,12 @@
       * {
         box-sizing: border-box;
       }
-.firma-box button {
-  display: block;
-  margin-top: 10px;
-  width: 100%;
-  max-width: 200px;
-}
+      .firma-box button {
+        display: block;
+        margin-top: 10px;
+        width: 100%;
+        max-width: 200px;
+      }
       .estado-limpieza {
         display: flex;
         gap: 20px;
@@ -21,7 +21,6 @@
         margin-bottom: 10px;
         flex-wrap: wrap;
       }
-
       .radio-option {
         background-color: #f0f0f0;
         padding: 10px 15px;
@@ -31,15 +30,12 @@
         font-weight: bold;
         transition: border-color 0.3s ease;
       }
-
       .radio-option:hover {
         border-color: #FDBE15;
       }
-
       .radio-option input {
         margin-right: 8px;
       }
-
       body {
         font-family: Arial, sans-serif;
         background-color: #FDBE15;
@@ -49,7 +45,6 @@
         justify-content: center;
         min-height: 100vh;
       }
-
       .container {
         width: 100%;
         max-width: 700px;
@@ -58,18 +53,15 @@
         border-radius: 10px;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
       }
-
       h2 {
         text-align: center;
         margin-top: 0;
       }
-
       label {
         font-weight: bold;
         display: block;
         margin-top: 15px;
       }
-
       textarea,
       input,
       select {
@@ -79,41 +71,35 @@
         border: 1px solid #ccc;
         border-radius: 4px;
       }
-
-.firma-container {
-  margin-top: 30px;
-  display: flex;
-  justify-content: center;
-}
-
-.firma-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 500px;
-  text-align: center;
-}
-
-.firma-box label {
-  margin-bottom: 10px;
-}
-
-canvas {
-  width: 100%;
-  height: 200px;
-  border: 2px solid #000;
-  touch-action: none;
-  margin-bottom: 10px;
-}
-
+      .firma-container {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+      }
+      .firma-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 500px;
+        text-align: center;
+      }
+      .firma-box label {
+        margin-bottom: 10px;
+      }
+      canvas {
+        width: 100%;
+        height: 200px;
+        border: 2px solid #000;
+        touch-action: none;
+        margin-bottom: 10px;
+      }
       img.logo {
         display: block;
         max-width: 100%;
         height: auto;
         margin: 0 auto 20px;
       }
-
       input[type="submit"],
       button {
         margin-top: 20px;
@@ -124,7 +110,6 @@ canvas {
         font-weight: bold;
         cursor: pointer;
       }
-
       input[type="submit"]:hover,
       button:hover {
         background-color: #e0a800;
@@ -182,13 +167,13 @@ canvas {
         <label>Responsable de Limpieza:</label>
         <input type="text" name="responsable_limpieza" required />
 
-<div class="firma-container">
-  <div class="firma-box">
-    <label for="firma1">Firma Responsable de Limpieza:</label>
-    <canvas id="firma1"></canvas>
-    <button type="button" onclick="limpiarFirma('firma1')">Limpiar Firma</button>
-  </div>
-</div>
+        <div class="firma-container">
+          <div class="firma-box">
+            <label for="firma1">Firma Responsable de Limpieza:</label>
+            <canvas id="firma1"></canvas>
+            <button type="button" onclick="limpiarFirma('firma1')">Limpiar Firma</button>
+          </div>
+        </div>
 
         <label>Adjuntar archivos:</label>
         <input type="file" name="archivos" id="archivos" multiple />
@@ -201,6 +186,16 @@ canvas {
       function setupCanvas(canvasId) {
         const canvas = document.getElementById(canvasId);
         const ctx = canvas.getContext('2d');
+
+        // Ajustar tamaño físico para evitar que se vea borroso
+        canvas.width = canvas.offsetWidth;
+        canvas.height = 200;
+
+        // Configurar estilo de la línea para que se vea bien
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+
         let isDrawing = false;
 
         canvas.addEventListener('pointerdown', e => {
@@ -216,8 +211,8 @@ canvas {
           }
         });
 
-        canvas.addEventListener('pointerup', () => isDrawing = false);
-        canvas.addEventListener('pointerleave', () => isDrawing = false);
+        canvas.addEventListener('pointerup', () => (isDrawing = false));
+        canvas.addEventListener('pointerleave', () => (isDrawing = false));
       }
 
       function limpiarFirma(id) {
@@ -234,26 +229,28 @@ canvas {
         const archivos = document.getElementById('archivos').files;
         const formData = new FormData();
 
-formData.append('formulario_id', form.formulario_id.value);
-formData.append('fecha', form.fecha.value);
-formData.append('aeronave', form.aeronave.value);
-formData.append('posicion', form.posicion.value);
-formData.append('tipo_limpieza', form.tipo_limpieza.value);
-formData.append('hora_inicio', form.hora_inicio.value);
-formData.append('hora_finalizacion', form.hora_finalizacion.value);
-formData.append('observaciones', form.observaciones.value);
-formData.append('responsable_limpieza', form.responsable_limpieza.value);
-formData.append('firma1', document.getElementById('firma1').toDataURL());
+        formData.append('formulario_id', form.formulario_id.value);
+        formData.append('fecha', form.fecha.value);
+        formData.append('aeronave', form.aeronave.value);
+        formData.append('posicion', form.posicion.value);
+        formData.append('tipo_limpieza', form.tipo_limpieza.value);
+        formData.append('hora_inicio', form.hora_inicio.value);
+        formData.append('hora_finalizacion', form.hora_finalizacion.value);
+        formData.append('observaciones', form.observaciones.value);
+        formData.append('responsable_limpieza', form.responsable_limpieza.value);
+        formData.append('firma1', document.getElementById('firma1').toDataURL());
 
+        for (let i = 0; i < archivos.length; i++) {
+          formData.append('archivos[]', archivos[i]);
+        }
 
-for (let i = 0; i < archivos.length; i++) {
-  formData.append('archivos[]', archivos[i]);
-}
-
-        fetch('https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec', {
-          method: 'POST',
-          body: formData
-        })
+        fetch(
+          'https://script.google.com/macros/s/AKfycbwX87zr4T9OkVE8jCYL5pfXgMLbeELDjLdSOkcwdawx-GvO-VO7gF-XvymSGuTrWCk_3A/exec',
+          {
+            method: 'POST',
+            body: formData,
+          }
+        )
           .then(res => res.text())
           .then(msg => alert(msg))
           .catch(err => alert('Error: ' + err));
@@ -265,41 +262,43 @@ for (let i = 0; i < archivos.length; i++) {
       }
 
       function cargarFormulario(data) {
-        const form = document.getElementById("cleaningForm");
+        const form = document.getElementById('cleaningForm');
 
         for (const [key, value] of Object.entries(data)) {
           const campo = form.elements[key];
           if (campo) {
             campo.value = value;
-            if (value && key !== "firma1") {
+            if (value && key !== 'firma1') {
               campo.disabled = true;
             }
           }
         }
 
         if (data.firma1) {
-          const canvas1 = document.getElementById("firma1");
-          const ctx1 = canvas1.getContext("2d");
+          const canvas1 = document.getElementById('firma1');
+          const ctx1 = canvas1.getContext('2d');
           const img1 = new Image();
           img1.onload = () => ctx1.drawImage(img1, 0, 0);
           img1.src = data.firma1;
-          canvas1.style.pointerEvents = "none";
+          canvas1.style.pointerEvents = 'none';
         }
 
         if (data.firma1) {
-          Array.from(form.elements).forEach(el => el.disabled = true);
-          document.querySelectorAll("canvas").forEach(c => c.style.pointerEvents = "none");
+          Array.from(form.elements).forEach(el => (el.disabled = true));
+          document.querySelectorAll('canvas').forEach(c => (c.style.pointerEvents = 'none'));
         }
       }
 
-      window.addEventListener("DOMContentLoaded", () => {
-        const id = getQueryParam("id");
+      window.addEventListener('DOMContentLoaded', () => {
+        const id = getQueryParam('id');
         if (id) {
-          document.getElementById("formulario_id").value = id;
-          fetch(`https://script.google.com/macros/s/AKfycbzGccKEzRJ9MZxK9rsgbdbAnt2nHJFUefy9i6lvsUcyLVuIrx2vXl8y1Ude9XdH8HZA5w/exec?formulario_id=${id}`)
+          document.getElementById('formulario_id').value = id;
+          fetch(
+            `https://script.google.com/macros/s/AKfycbzGccKEzRJ9MZxK9rsgbdbAnt2nHJFUefy9i6lvsUcyLVuIrx2vXl8y1Ude9XdH8HZA5w/exec?formulario_id=${id}`
+          )
             .then(res => res.json())
             .then(data => cargarFormulario(data))
-            .catch(err => console.error("Error al cargar datos:", err));
+            .catch(err => console.error('Error al cargar datos:', err));
         }
       });
     </script>
