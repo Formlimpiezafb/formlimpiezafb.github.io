@@ -18,11 +18,6 @@
 <body>
   <h2>Formulario Recepción</h2>
 
-  <label>Ingresá ID de formulario (recibido tras limpieza):
-    <input type="text" id="formId" />
-    <button id="cargarBtn">Cargar Datos</button>
-  </label>
-
   <form id="formRecepcion" style="display:none;" enctype="multipart/form-data">
     <fieldset disabled>
       <label>Fecha limpieza:
@@ -131,14 +126,7 @@ document.getElementById('clearFirma').onclick = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-document.getElementById('cargarBtn').onclick = async () => {
-  const id = document.getElementById('formId').value.trim();
-  if(!id){
-    alert('Ingrese ID válido');
-    return;
-  }
-
-  // Consultar a Apps Script para obtener datos
+async function cargarFormularioPorId(id){
   try {
     let resp = await fetch(url + '?action=list');
     let data = await resp.json();
@@ -168,12 +156,20 @@ document.getElementById('cargarBtn').onclick = async () => {
   } catch(err){
     alert('Error al cargar datos: ' + err.message);
   }
+}
+
+window.onload = () => {
+  const params = new URLSearchParams(window.location.search);
+  if(params.has('id')){
+    cargarFormularioPorId(params.get('id'));
+  } else {
+    alert('No se recibió ID para cargar formulario');
+  }
 };
 
 document.getElementById('formRecepcion').onsubmit = async (e) => {
   e.preventDefault();
 
-  // Validar firma
   const blank = document.createElement('canvas');
   blank.width = canvas.width;
   blank.height = canvas.height;
@@ -193,7 +189,6 @@ document.getElementById('formRecepcion').onsubmit = async (e) => {
       e.target.reset();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       document.getElementById('formRecepcion').style.display = 'none';
-      document.getElementById('formId').value = '';
     } else {
       alert('Error: ' + data.message);
     }
