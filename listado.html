@@ -57,9 +57,10 @@ async function cargarDatos(){
     });
 
     data.completados.forEach(f => {
+      let pdfLink = f['PDF generado URL'] || f['PDF generado url'] || '#';
       let tr = document.createElement('tr');
       tr.innerHTML = `<td>${f.ID}</td><td>${f.Fecha}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
-        <td><a href="${f['PDF generado URL'] || f['PDF generado url'] || '#'}" target="_blank">Ver PDF</a></td>`;
+        <td>${ pdfLink !== '#' ? `<a href="${pdfLink}" target="_blank">Ver PDF</a>` : 'Sin PDF' }</td>`;
       tbodyComp.appendChild(tr);
     });
 
