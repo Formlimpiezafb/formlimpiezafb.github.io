@@ -59,7 +59,7 @@ async function cargarDatos(){
     data.completados.forEach(f => {
       let tr = document.createElement('tr');
       tr.innerHTML = `<td>${f.ID}</td><td>${f.Fecha}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
-        <td><a href="${f['PDF Generado URL']}" target="_blank">Ver PDF</a></td>`;
+        <td><a href="${f['PDF generado URL'] || f['PDF generado url'] || '#'}" target="_blank">Ver PDF</a></td>`;
       tbodyComp.appendChild(tr);
     });
 
