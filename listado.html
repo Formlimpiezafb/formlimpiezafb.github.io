@@ -69,16 +69,11 @@ async function cargarDatos(){
 }
 
 function abrirRecepcion(id){
-  // Abrir formulario recepción en nueva pestaña pasando el ID para precarga
   window.open('recepcion.html?id=' + encodeURIComponent(id), '_blank');
 }
 
-// También si querés podés prellenar el campo de recepción con ?id= en URL
 window.onload = () => {
-  const params = new URLSearchParams(window.location.search);
-  if(params.has('id')){
-    abrirRecepcion(params.get('id'));
-  }
+  cargarDatos();
 }
 </script>
 </body>
