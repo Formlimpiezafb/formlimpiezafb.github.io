@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Listado Formularios</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 900px; margin: auto; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px;}
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+  th { background: #eee; }
+  button { padding: 5px 10px; }
+</style>
+</head>
+<body>
+  <h2>Listado Formularios</h2>
+  <button onclick="cargarDatos()">Cargar Formularios</button>
+
+  <h3>Pendientes</h3>
+  <table id="tablaPendientes">
+    <thead>
+      <tr>
+        <th>ID</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3>Completados</h3>
+  <table id="tablaCompletados">
+    <thead>
+      <tr>
+        <th>ID</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>PDF</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
+
+async function cargarDatos(){
+  try {
+    let resp = await fetch(url + '?action=list');
+    let data = await resp.json();
+
+    let tbodyPend = document.querySelector('#tablaPendientes tbody');
+    let tbodyComp = document.querySelector('#tablaCompletados tbody');
+
+    tbodyPend.innerHTML = '';
+    tbodyComp.innerHTML = '';
+
+    data.pendientes.forEach(f => {
+      let tr = document.createElement('tr');
+      tr.innerHTML = `<td>${f.ID}</td><td>${f.Fecha}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
+        <td><button onclick="abrirRecepcion('${f.ID}')">Abrir Recepción</button></td>`;
+      tbodyPend.appendChild(tr);
+    });
+
+    data.completados.forEach(f => {
+      let tr = document.createElement('tr');
+      tr.innerHTML = `<td>${f.ID}</td><td>${f.Fecha}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
+        <td><a href="${f['PDF Generado URL']}" target="_blank">Ver PDF</a></td>`;
+      tbodyComp.appendChild(tr);
+    });
+
+  } catch(err){
+    alert('Error al cargar listado: ' + err.message);
+  }
+}
+
+function abrirRecepcion(id){
+  // Abrir formulario recepción en nueva pestaña pasando el ID para precarga
+  window.open('recepcion.html?id=' + encodeURIComponent(id), '_blank');
+}
+
+// También si querés podés prellenar el campo de recepción con ?id= en URL
+window.onload = () => {
+  const params = new URLSearchParams(window.location.search);
+  if(params.has('id')){
+    abrirRecepcion(params.get('id'));
+  }
+}
+</script>
+</body>
+</html>
