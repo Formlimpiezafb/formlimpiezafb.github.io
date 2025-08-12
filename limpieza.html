@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Formulario Limpieza</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; }
+  label { display: block; margin-top: 15px; }
+  input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+  canvas { border: 1px solid #ccc; margin-top: 5px; }
+  button { margin-top: 20px; padding: 10px 20px; }
+</style>
+</head>
+<body>
+  <h2>Formulario de Limpieza</h2>
+  <form id="formLimpieza" enctype="multipart/form-data">
+    <label>Fecha:
+      <input type="date" name="fecha" required />
+    </label>
+    <label>Matrícula:
+      <input type="text" name="matricula" required />
+    </label>
+    <label>Posición:
+      <input type="text" name="posicion" required />
+    </label>
+    <label>Hora Inicio:
+      <input type="time" name="horaInicio" required />
+    </label>
+    <label>Hora Fin:
+      <input type="time" name="horaFin" required />
+    </label>
+    <label>Tipo de Limpieza:
+      <select name="tipoLimpieza" required>
+        <option value="">Seleccione</option>
+        <option value="Superficial">Superficial</option>
+        <option value="Profunda">Profunda</option>
+        <option value="Profunda Plus">Profunda Plus</option>
+      </select>
+    </label>
+    <label>Responsable limpieza:
+      <input type="text" name="responsable" required />
+    </label>
+    <label>Firma (tocar o click y dibujar):</label>
+    <canvas id="canvasFirma" width="400" height="150"></canvas>
+    <button type="button" id="clearFirma">Limpiar Firma</button>
+
+    <label>Observaciones:
+      <textarea name="observaciones" rows="3"></textarea>
+    </label>
+    <label>Adjuntar archivos:
+      <input type="file" name="files" multiple />
+    </label>
+
+    <button type="submit">Enviar Limpieza</button>
+  </form>
+
+<script>
+const canvas = document.getElementById('canvasFirma');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+
+canvas.addEventListener('mousedown', (e) => {
+  drawing = true;
+  ctx.beginPath();
+  ctx.moveTo(e.offsetX, e.offsetY);
+});
+canvas.addEventListener('mouseup', (e) => {
+  drawing = false;
+});
+canvas.addEventListener('mouseout', (e) => {
+  drawing = false;
+});
+canvas.addEventListener('mousemove', (e) => {
+  if(drawing){
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+  }
+});
+
+// Para soporte táctil:
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0];
+  ctx.beginPath();
+  ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  drawing = true;
+});
+canvas.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  drawing = false;
+});
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  if(!drawing) return;
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0];
+  ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  ctx.stroke();
+});
+
+document.getElementById('clearFirma').onclick = () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+document.getElementById('formLimpieza').onsubmit = async (e) => {
+  e.preventDefault();
+
+  // Validar que haya dibujo en canvas
+  const blank = document.createElement('canvas');
+  blank.width = canvas.width;
+  blank.height = canvas.height;
+  if(canvas.toDataURL() === blank.toDataURL()){
+    alert('Por favor, firme antes de enviar');
+    return;
+  }
+
+  const formData = new FormData(e.target);
+  // Agregar la firma en base64
+  formData.append('firma', canvas.toDataURL());
+  formData.append('formType', 'limpieza');
+
+  // Enviar a Apps Script (poné tu URL)
+  const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await resp.json();
+    if(data.status === 'ok'){
+      alert('Formulario enviado correctamente! ID: ' + data.id);
+      e.target.reset();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    } else {
+      alert('Error: ' + data.message);
+    }
+  } catch(err){
+    alert('Error al enviar: ' + err.message);
+  }
+};
+</script>
+</body>
+</html>
