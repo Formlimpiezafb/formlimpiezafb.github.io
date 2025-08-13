@@ -144,11 +144,11 @@ async function cargarFormularioPorId(id){
     document.getElementById('formIdHidden').value = id;
 
     // Campos limpieza
-    document.getElementById('fecha').value = formData.Fecha || '';
+    document.getElementById('fecha').value = convertirFecha(formData.Fecha);
     document.getElementById('matricula').value = formData.Matrícula || '';
     document.getElementById('posicion').value = formData.Posición || '';
-    document.getElementById('horaInicio').value = formData['Hora Inicio'] || '';
-    document.getElementById('horaFin').value = formData['Hora Fin'] || '';
+    document.getElementById('horaInicio').value = convertirHora(formData['Hora Inicio']);
+    document.getElementById('horaFin').value = convertirHora(formData['Hora Fin']);
     document.getElementById('tipoLimpieza').value = formData['Tipo Limpieza'] || '';
     document.getElementById('responsable').value = formData.Responsable || '';
     document.getElementById('observaciones').value = formData.Observaciones || '';
