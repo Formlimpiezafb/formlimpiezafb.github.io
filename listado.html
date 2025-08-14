@@ -215,7 +215,11 @@ function renderTabla(datos, tablaId, esPendiente){
     } else {
       fila.innerHTML = `<td>${i+1}</td><td>${formatFecha(f.Fecha)}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
         <td>${f.Conforme || ''}</td>
-        <td><a href="${f['PDF Generado URL']}" target="_blank" class="btn-pdf">Ver PDF</a></td>`;
+        <td>
+          <a href="${f.T || '#'}" target="_blank" class="btn-pdf">
+            ${f.T ? 'Ver PDF' : 'No disponible'}
+          </a>
+        </td>`;
     }
     tbody.appendChild(fila);
   });
