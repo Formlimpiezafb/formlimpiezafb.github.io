@@ -6,140 +6,38 @@
 <title>Listado de Formularios - Control de Limpieza</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #fff8d6;
-    overflow-x: hidden;
-    padding: 20px;
-    position: relative;
-  }
-
+  body { font-family: 'Segoe UI', sans-serif; background-color: #fff8d6; overflow-x: hidden; padding: 20px; position: relative; }
   h2 { color: #333; margin-bottom: 20px; text-align: center; position: relative; z-index: 10; }
-
-  .filters {
-    margin-bottom: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    position: relative;
-    z-index: 10;
-  }
-
-  .filters label {
-    font-weight: bold;
-    color: #333;
-  }
-
-  select, input[type="date"] {
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    min-width: 150px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    background-color: #fffde6;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    position: relative;
-    z-index: 10;
-  }
-
-  th, td {
-    padding: 10px;
-    border: 1px solid #f0e8c2;
-    text-align: center;
-  }
-
-  th {
-    background-color: #f6b800;
-    color: white;
-    font-weight: bold;
-  }
-
+  .filters { margin-bottom: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; position: relative; z-index: 10; }
+  .filters label { font-weight: bold; color: #333; }
+  select, input[type="date"] { padding: 8px; border-radius: 8px; border: 1px solid #ccc; min-width: 150px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; background-color: #fffde6; border-radius: 10px; overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.1); position: relative; z-index: 10; }
+  th, td { padding: 10px; border: 1px solid #f0e8c2; text-align: center; }
+  th { background-color: #f6b800; color: white; font-weight: bold; }
   tbody tr:nth-child(even) { background-color: #fff9d1; }
-
-  button.pdf-btn {
-    background-color: #f6b800;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
+  button.pdf-btn { background-color: #f6b800; color: white; padding: 5px 10px; border-radius: 8px; border: none; cursor: pointer; transition: background-color 0.3s; }
   button.pdf-btn:hover { background-color: #e0a000; }
-
-  button {
-    padding: 5px 10px;
-    border-radius: 8px;
-    background-color: #f6b800;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
+  button { padding: 5px 10px; border-radius: 8px; background-color: #f6b800; color: white; border: none; cursor: pointer; transition: background-color 0.3s; }
   button:hover { background-color: #e0a000; }
 
   /* NUBES */
-  .cloud {
-    position: absolute;
-    background: url("data:image/svg+xml;utf8,\
+  .cloud { position: absolute; background: url("data:image/svg+xml;utf8,\
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'>\
-<circle cx='30' cy='30' r='20' fill='white'/><circle cx='50' cy='25' r='25' fill='white'/><circle cx='75' cy='30' r='20' fill='white'/></svg>") no-repeat center;
-    background-size: contain;
-    width: 200px;
-    height: 100px;
-    opacity: 0.6;
-    z-index: 1;
-  }
-
+<circle cx='30' cy='30' r='20' fill='white'/><circle cx='50' cy='25' r='25' fill='white'/><circle cx='75' cy='30' r='20' fill='white'/></svg>") no-repeat center; background-size: contain; width: 200px; height: 100px; opacity: 0.6; z-index: 1; }
   @keyframes cloud-left { 0% { transform: translateX(-300px); } 100% { transform: translateX(100vw); } }
   @keyframes cloud-right { 0% { transform: translateX(100vw); } 100% { transform: translateX(-300px); } }
 
   /* LOGO ESTÁTICO */
-  #logoImg {
-    position: fixed;
-    top: 20px;
-    right: 30px;
-    width: 280px;
-    height: 140px;
-    z-index: 10;
-  }
-  #logoImg img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
+  #logoImg { position: fixed; top: 20px; right: 30px; width: 280px; height: 140px; z-index: 10; }
+  #logoImg img { width: 100%; height: 100%; object-fit: contain; }
 
   /* Modal PDF */
-  #pdfModal {
-    display: none;
-    position: fixed;
-    top:0;
-    left:0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.8);
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  #pdfModal iframe {
-    width: 90%;
-    height: 90%;
-    border: none;
-  }
+  #pdfModal { display: none; position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000; }
+  #pdfModal iframe { width: 90%; height: 90%; border: none; }
 </style>
 </head>
 <body>
 
-<!-- LOGO -->
 <div id="logoImg">
   <img src="https://i.imgur.com/evesmtC.png" alt="Logo">
 </div>
@@ -156,9 +54,7 @@
 <h3>Pendientes</h3>
 <table id="tablaPendientes">
   <thead>
-    <tr>
-      <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th>
-    </tr>
+    <tr><th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th></tr>
   </thead>
   <tbody></tbody>
 </table>
@@ -166,14 +62,11 @@
 <h3>Completados</h3>
 <table id="tablaCompletados">
   <thead>
-    <tr>
-      <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Condición</th><th>PDF</th>
-    </tr>
+    <tr><th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Condición</th><th>PDF</th></tr>
   </thead>
   <tbody></tbody>
 </table>
 
-<!-- Modal PDF -->
 <div id="pdfModal" onclick="cerrarModal()">
   <iframe id="pdfFrame"></iframe>
 </div>
@@ -187,18 +80,13 @@ function formatFecha(fechaStr) {
   if(!fechaStr) return '';
   const d = new Date(fechaStr);
   if(isNaN(d)) return '';
-  const dd = String(d.getDate()).padStart(2,'0');
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const yyyy = d.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
 
 function llenarFiltroMatricula() {
   const selectMat = document.getElementById('filtroMatricula');
   const todasMatriculas = new Set();
-  dataPendientes.concat(dataCompletados).forEach(f => {
-    if(f.Matrícula) todasMatriculas.add(f.Matrícula);
-  });
+  dataPendientes.concat(dataCompletados).forEach(f => { if(f.Matrícula) todasMatriculas.add(f.Matrícula); });
   selectMat.innerHTML = '<option value="">Todas</option>';
   Array.from(todasMatriculas).sort().forEach(mat => {
     const option = document.createElement('option');
@@ -211,20 +99,12 @@ function llenarFiltroMatricula() {
 function aplicarFiltrosYRender() {
   const filtroFecha = document.getElementById('filtroFecha').value;
   const filtroMatricula = document.getElementById('filtroMatricula').value;
-
   const filtrar = (f) => {
     let coincide = true;
-    if(filtroFecha) {
-      const fForm = new Date(f.Fecha);
-      const fFiltro = new Date(filtroFecha);
-      coincide = coincide && (fForm.toDateString() === fFiltro.toDateString());
-    }
-    if(filtroMatricula) {
-      coincide = coincide && (f.Matrícula === filtroMatricula);
-    }
+    if(filtroFecha) { coincide = coincide && (new Date(f.Fecha).toDateString() === new Date(filtroFecha).toDateString()); }
+    if(filtroMatricula) { coincide = coincide && (f.Matrícula === filtroMatricula); }
     return coincide;
   };
-
   renderTabla(dataPendientes.filter(filtrar), 'tablaPendientes', true);
   renderTabla(dataCompletados.filter(filtrar), 'tablaCompletados', false);
 }
@@ -240,10 +120,7 @@ function renderTabla(datos, tablaId, esPendiente){
     } else {
       let condicion = f["Conforme?"] || '';
       let pdfUrl = f["U"] || '';
-      fila.innerHTML = `<td>${i+1}</td>
-                        <td>${formatFecha(f.Fecha)}</td>
-                        <td>${f.Matrícula}</td>
-                        <td>${f.Estado}</td>
+      fila.innerHTML = `<td>${i+1}</td><td>${formatFecha(f.Fecha)}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
                         <td>${condicion}</td>
                         <td>${pdfUrl ? `<button class="pdf-btn" onclick="mostrarPDF('${pdfUrl}')">Ver PDF</button>` : ''}</td>`;
     }
@@ -252,7 +129,9 @@ function renderTabla(datos, tablaId, esPendiente){
 }
 
 function abrirRecepcion(id){
-  window.open('recepcion.html?id=' + encodeURIComponent(id), '_blank');
+  const nuevaVentana = window.open('recepcion.html?id=' + encodeURIComponent(id), '_blank');
+  // Enviar referencia para refresco automático
+  if(nuevaVentana) { nuevaVentana.refrescarListado = refrescarDatos; }
 }
 
 async function cargarDatos(){
@@ -264,43 +143,38 @@ async function cargarDatos(){
     llenarFiltroMatricula();
     aplicarFiltrosYRender();
   } catch(err){
-    alert('Error al cargar listado: ' + err.message);
+    console.error('Error al cargar listado:', err);
   }
 }
+
+// Refresco automático cada 20 segundos
+async function refrescarDatos() { await cargarDatos(); }
 
 document.getElementById('filtroFecha').addEventListener('change', aplicarFiltrosYRender);
 document.getElementById('filtroMatricula').addEventListener('change', aplicarFiltrosYRender);
 
-window.onload = cargarDatos;
+window.onload = () => {
+  cargarDatos();
+  setInterval(refrescarDatos, 20000);
+};
 
-// Funciones modal PDF
+// Modal PDF
 function mostrarPDF(url){
   const iframe = document.getElementById('pdfFrame');
-  // Transformar link de Drive para vista previa si es link normal
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if(match){
-    iframe.src = `https://drive.google.com/file/d/${match[1]}/preview`;
-  } else {
-    iframe.src = url;
-  }
+  if(match){ iframe.src = `https://drive.google.com/file/d/${match[1]}/preview`; } 
+  else { iframe.src = url; }
   document.getElementById('pdfModal').style.display = 'flex';
 }
-function cerrarModal(){
-  document.getElementById('pdfModal').style.display = 'none';
-  document.getElementById('pdfFrame').src = '';
-}
-</script>
+function cerrarModal(){ document.getElementById('pdfModal').style.display = 'none'; document.getElementById('pdfFrame').src = ''; }
 
-<!-- NUBES -->
-<script>
+// NUBES
 const numClouds = 15;
 for (let i=0;i<numClouds;i++){
   const cloud = document.createElement('div');
   cloud.classList.add('cloud');
-  const top = Math.random()*80;
-  const left = Math.random()*100;
-  cloud.style.top = `${top}vh`;
-  cloud.style.left = `${left}vw`;
+  cloud.style.top = `${Math.random()*80}vh`;
+  cloud.style.left = `${Math.random()*100}vw`;
   cloud.style.animation = `cloud-left ${40 + Math.random()*60}s linear infinite`;
   if(Math.random()>0.5) cloud.style.animation = `cloud-right ${40 + Math.random()*60}s linear infinite`;
   cloud.style.transform = `scale(${0.6 + Math.random()*1})`;
