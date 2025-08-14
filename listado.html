@@ -11,6 +11,12 @@
     background-color: #fff8d6;
     overflow-x: hidden;
     padding: 20px;
+    position: relative;
+  }
+
+  .main-content {
+    position: relative;
+    z-index: 10; /* contenido arriba de las nubes */
   }
 
   h2 { color: #333; margin-bottom: 20px; text-align: center; }
@@ -21,11 +27,10 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 15px;
-  }
-
-  .filters label {
-    font-weight: bold;
-    color: #333;
+    background-color: #fffde6;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
   }
 
   select, input[type="date"] {
@@ -59,28 +64,19 @@
 
   tbody tr:nth-child(even) { background-color: #fff9d1; }
 
-  a.btn-pdf {
+  a.btn-pdf, button {
     background-color: #f6b800;
     color: white;
     padding: 5px 10px;
     border-radius: 8px;
+    border: none;
+    cursor: pointer;
     text-decoration: none;
     transition: background-color 0.3s;
   }
-  a.btn-pdf:hover { background-color: #e0a000; }
+  a.btn-pdf:hover, button:hover { background-color: #e0a000; }
 
-  button {
-    padding: 5px 10px;
-    border-radius: 8px;
-    background-color: #f6b800;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  button:hover { background-color: #e0a000; }
-
-  /* NUBES SVG */
+  /* NUBES en el fondo */
   .cloud {
     position: absolute;
     background: url("data:image/svg+xml;utf8,\
@@ -89,64 +85,62 @@
     background-size: contain;
     width: 200px;
     height: 100px;
-    opacity: 0.6;
+    opacity: 0.5;
     z-index: 1;
+    animation: floatCloud 60s linear infinite;
   }
 
-  @keyframes cloud-left { 0% { transform: translateX(-300px); } 100% { transform: translateX(100vw); } }
-  @keyframes cloud-right { 0% { transform: translateX(100vw); } 100% { transform: translateX(-300px); } }
-
-  /* AVIONES */
-  .plane {
-    position: absolute;
-    font-size: 24px;
-    opacity: 0.85;
-    z-index: 2;
-    white-space: nowrap;
+  @keyframes floatCloud {
+    0% { transform: translateX(-250px) translateY(0); opacity: 0.5; }
+    50% { opacity: 0.7; }
+    100% { transform: translateX(100vw) translateY(0); opacity: 0.5; }
   }
-
-  /* LIMPIADORES */
-  .cleaner {
-    position: absolute;
-    font-size: 28px;
-    opacity: 0.9;
-    z-index: 3;
-    white-space: nowrap;
-    user-select: none;
-  }
-
 </style>
 </head>
 <body>
 
-<h2>Listado de Formularios</h2>
+<!-- NUBES -->
+<script>
+  const numClouds = 15;
+  for (let i=0;i<numClouds;i++){
+    const cloud = document.createElement('div');
+    cloud.classList.add('cloud');
+    const top = Math.random()*70;
+    const scale = 0.5 + Math.random()*1;
+    cloud.style.top = `${top}vh`;
+    cloud.style.transform = `scale(${scale})`;
+    cloud.style.animationDuration = `${40 + Math.random()*60}s`;
+    cloud.style.left = `${-Math.random()*200}px`; // empezar afuera
+    document.body.appendChild(cloud);
+  }
+</script>
 
-<div class="filters">
-  <label>Fecha: <input type="date" id="filtroFecha"></label>
-  <label>Matrícula: 
-    <select id="filtroMatricula"><option value="">Todas</option></select>
-  </label>
+<div class="main-content">
+  <h2>Listado de Formularios</h2>
+
+  <div class="filters">
+    <label>Fecha: <input type="date" id="filtroFecha"></label>
+    <label>Matrícula: 
+      <select id="filtroMatricula"><option value="">Todas</option></select>
+    </label>
+  </div>
+
+  <h3>Pendientes</h3>
+  <table id="tablaPendientes">
+    <thead>
+      <tr><th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3>Completados</h3>
+  <table id="tablaCompletados">
+    <thead>
+      <tr><th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Condición</th><th>PDF</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
-
-<h3>Pendientes</h3>
-<table id="tablaPendientes">
-  <thead>
-    <tr>
-      <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
-<h3>Completados</h3>
-<table id="tablaCompletados">
-  <thead>
-    <tr>
-      <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Condición</th><th>PDF</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
 
 <script>
 const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
@@ -237,22 +231,6 @@ document.getElementById('filtroFecha').addEventListener('change', aplicarFiltros
 document.getElementById('filtroMatricula').addEventListener('change', aplicarFiltrosYRender);
 
 window.onload = cargarDatos;
-</script>
-
-<!-- NUBES Y AVIONES OPCIONAL -->
-<script>
-const numClouds = 15;
-for (let i=0;i<numClouds;i++){
-  const cloud = document.createElement('div');
-  cloud.classList.add('cloud');
-  const top = Math.random()*80;
-  const left = Math.random()*100;
-  cloud.style.top = `${top}vh`;
-  cloud.style.left = `${left}vw`;
-  cloud.style.animation = `cloud-left ${40 + Math.random()*60}s linear infinite`;
-  cloud.style.transform = `scale(${0.6 + Math.random()*1})`;
-  document.body.appendChild(cloud);
-}
 </script>
 
 </body>
