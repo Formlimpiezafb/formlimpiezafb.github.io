@@ -6,17 +6,16 @@
 <style>
   body { font-family: Arial, sans-serif; max-width: 900px; margin: auto; }
   table { width: 100%; border-collapse: collapse; margin-top: 20px;}
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; cursor: pointer; }
   th { background: #eee; }
   input { margin-bottom: 10px; padding: 5px; width: 200px; }
-  button { padding: 5px 10px; }
+  a { text-decoration: none; color: blue; }
 </style>
 </head>
 <body>
   <h2>Listado Formularios</h2>
 
   <label>Buscar: <input type="text" id="filtroBusqueda" placeholder="Filtrar por matrícula o estado..." /></label>
-  <button onclick="cargarDatos()">Recargar Formularios</button>
 
   <h3>Pendientes</h3>
   <table id="tablaPendientes">
@@ -40,8 +39,10 @@
 
 <script>
 const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
+let dataPendientes = [];
+let dataCompletados = [];
 
-// Función para convertir fecha ISO a DD/MM/AAAA
+// Convertir fecha ISO a DD/MM/AAAA
 function formatFecha(fechaStr){
   if(!fechaStr) return '';
   const fecha = new Date(fechaStr);
@@ -57,48 +58,51 @@ async function cargarDatos(){
     let resp = await fetch(url + '?action=list');
     let data = await resp.json();
 
-    const filtro = document.getElementById('filtroBusqueda').value.toLowerCase();
+    dataPendientes = data.pendientes;
+    dataCompletados = data.completados;
 
-    let tbodyPend = document.querySelector('#tablaPendientes tbody');
-    let tbodyComp = document.querySelector('#tablaCompletados tbody');
-
-    tbodyPend.innerHTML = '';
-    tbodyComp.innerHTML = '';
-
-    // Pendientes
-    data.pendientes.forEach((f, index) => {
-      const mat = f.Matrícula ? f.Matrícula.toLowerCase() : '';
-      const estado = f.Estado ? f.Estado.toLowerCase() : '';
-      if(filtro && !mat.includes(filtro) && !estado.includes(filtro)) return;
-
-      let tr = document.createElement('tr');
-      tr.innerHTML = `<td>${index + 1}</td>
-        <td>${formatFecha(f.Fecha)}</td>
-        <td>${f.Matrícula}</td>
-        <td>${f.Estado}</td>
-        <td><button onclick="abrirRecepcion('${f.ID}')">Abrir Recepción</button></td>`;
-      tbodyPend.appendChild(tr);
-    });
-
-    // Completados
-    data.completados.forEach((f, index) => {
-      const mat = f.Matrícula ? f.Matrícula.toLowerCase() : '';
-      const estado = f.Estado ? f.Estado.toLowerCase() : '';
-      if(filtro && !mat.includes(filtro) && !estado.includes(filtro)) return;
-
-      let tr = document.createElement('tr');
-      tr.innerHTML = `<td>${index + 1}</td>
-        <td>${formatFecha(f.Fecha)}</td>
-        <td>${f.Matrícula}</td>
-        <td>${f.Estado}</td>
-        <td>${f.Conforme || ''}</td>
-        <td><a href="${f['PDF Generado URL']}" target="_blank">Ver PDF</a></td>`;
-      tbodyComp.appendChild(tr);
-    });
-
+    aplicarFiltroYRender();
   } catch(err){
     alert('Error al cargar listado: ' + err.message);
   }
+}
+
+function aplicarFiltroYRender(){
+  const filtro = document.getElementById('filtroBusqueda').value.toLowerCase();
+
+  let tbodyPend = document.querySelector('#tablaPendientes tbody');
+  let tbodyComp = document.querySelector('#tablaCompletados tbody');
+  tbodyPend.innerHTML = '';
+  tbodyComp.innerHTML = '';
+
+  dataPendientes.forEach((f, index) => {
+    const mat = f.Matrícula ? f.Matrícula.toLowerCase() : '';
+    const estado = f.Estado ? f.Estado.toLowerCase() : '';
+    if(filtro && !mat.includes(filtro) && !estado.includes(filtro)) return;
+
+    let tr = document.createElement('tr');
+    tr.innerHTML = `<td>${index + 1}</td>
+      <td>${formatFecha(f.Fecha)}</td>
+      <td>${f.Matrícula}</td>
+      <td>${f.Estado}</td>
+      <td><button onclick="abrirRecepcion('${f.ID}')">Abrir Recepción</button></td>`;
+    tbodyPend.appendChild(tr);
+  });
+
+  dataCompletados.forEach((f, index) => {
+    const mat = f.Matrícula ? f.Matrícula.toLowerCase() : '';
+    const estado = f.Estado ? f.Estado.toLowerCase() : '';
+    if(filtro && !mat.includes(filtro) && !estado.includes(filtro)) return;
+
+    let tr = document.createElement('tr');
+    tr.innerHTML = `<td>${index + 1}</td>
+      <td>${formatFecha(f.Fecha)}</td>
+      <td>${f.Matrícula}</td>
+      <td>${f.Estado}</td>
+      <td>${f.Conforme || f['Condición'] || ''}</td>
+      <td><a href="${f['PDF Generado URL']}" target="_blank">Ver PDF</a></td>`;
+    tbodyComp.appendChild(tr);
+  });
 }
 
 function abrirRecepcion(id){
@@ -107,12 +111,39 @@ function abrirRecepcion(id){
 
 // Filtrar al escribir
 document.getElementById('filtroBusqueda').addEventListener('input', () => {
-  cargarDatos();
+  aplicarFiltroYRender();
 });
 
-window.onload = () => {
-  cargarDatos();
+// --- Ordenamiento ---
+function ordenarTabla(tabla, dataArray, key, asc=true){
+  dataArray.sort((a,b)=>{
+    let va = a[key] || '';
+    let vb = b[key] || '';
+    if(key === 'Fecha'){ va = new Date(va); vb = new Date(vb); }
+    if(va < vb) return asc ? -1 : 1;
+    if(va > vb) return asc ? 1 : -1;
+    return 0;
+  });
+  aplicarFiltroYRender();
 }
+
+document.querySelectorAll('#tablaPendientes th').forEach((th, idx)=>{
+  if(idx===4) return; // Saltar columna acción
+  th.addEventListener('click', ()=>{
+    const key = th.innerText.trim();
+    ordenarTabla('#tablaPendientes', dataPendientes, key);
+  });
+});
+document.querySelectorAll('#tablaCompletados th').forEach((th, idx)=>{
+  if(idx===5) return; // Saltar columna PDF
+  th.addEventListener('click', ()=>{
+    const key = th.innerText.trim();
+    ordenarTabla('#tablaCompletados', dataCompletados, key);
+  });
+});
+
+// Cargar automáticamente
+window.onload = cargarDatos;
 </script>
 </body>
 </html>
