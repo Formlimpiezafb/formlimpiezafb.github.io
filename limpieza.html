@@ -15,7 +15,7 @@
   <h2>Formulario de Limpieza</h2>
   <form id="formLimpieza" enctype="multipart/form-data">
     <label>Fecha:
-      <input type="date" name="fecha" required />
+      <input type="text" name="fecha" id="fecha" readonly />
     </label>
     <label>Matrícula:
       <input type="text" name="matricula" required />
@@ -64,20 +64,14 @@ canvas.addEventListener('mousedown', (e) => {
   ctx.beginPath();
   ctx.moveTo(e.offsetX, e.offsetY);
 });
-canvas.addEventListener('mouseup', (e) => {
-  drawing = false;
-});
-canvas.addEventListener('mouseout', (e) => {
-  drawing = false;
-});
+canvas.addEventListener('mouseup', () => drawing = false);
+canvas.addEventListener('mouseout', () => drawing = false);
 canvas.addEventListener('mousemove', (e) => {
   if(drawing){
     ctx.lineTo(e.offsetX, e.offsetY);
     ctx.stroke();
   }
 });
-
-// Para soporte táctil:
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault();
   const rect = canvas.getBoundingClientRect();
@@ -86,10 +80,7 @@ canvas.addEventListener('touchstart', (e) => {
   ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
   drawing = true;
 });
-canvas.addEventListener('touchend', (e) => {
-  e.preventDefault();
-  drawing = false;
-});
+canvas.addEventListener('touchend', (e) => { e.preventDefault(); drawing = false; });
 canvas.addEventListener('touchmove', (e) => {
   e.preventDefault();
   if(!drawing) return;
@@ -99,9 +90,24 @@ canvas.addEventListener('touchmove', (e) => {
   ctx.stroke();
 });
 
-document.getElementById('clearFirma').onclick = () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+document.getElementById('clearFirma').onclick = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+// Función para convertir fecha a DD/MM/YYYY
+function convertirFecha(fechaStr) {
+  if(!fechaStr) return '';
+  const partes = fechaStr.split('-'); // espera YYYY-MM-DD
+  if(partes.length !== 3) return '';
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
+
+// Cargar fecha automáticamente al abrir el formulario
+window.onload = () => {
+  const hoy = new Date();
+  const yyyy = hoy.getFullYear();
+  const mm = ('0' + (hoy.getMonth()+1)).slice(-2);
+  const dd = ('0' + hoy.getDate()).slice(-2);
+  document.getElementById('fecha').value = `${dd}/${mm}/${yyyy}`;
+};
 
 document.getElementById('formLimpieza').onsubmit = async (e) => {
   e.preventDefault();
@@ -116,11 +122,9 @@ document.getElementById('formLimpieza').onsubmit = async (e) => {
   }
 
   const formData = new FormData(e.target);
-  // Agregar la firma en base64
   formData.append('firma', canvas.toDataURL());
   formData.append('formType', 'limpieza');
 
-  // Enviar a Apps Script (poné tu URL)
   const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
 
   try {
@@ -133,6 +137,12 @@ document.getElementById('formLimpieza').onsubmit = async (e) => {
       alert('Formulario enviado correctamente! ID: ' + data.id);
       e.target.reset();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Volver a poner fecha actual en DD/MM/YYYY
+      const hoy = new Date();
+      const yyyy = hoy.getFullYear();
+      const mm = ('0' + (hoy.getMonth()+1)).slice(-2);
+      const dd = ('0' + hoy.getDate()).slice(-2);
+      document.getElementById('fecha').value = `${dd}/${mm}/${yyyy}`;
     } else {
       alert('Error: ' + data.message);
     }
