@@ -1,52 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
 <meta charset="UTF-8" />
-<title>Listado Formularios</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Listado de Formularios - Control de Limpieza</title>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 1000px; margin: auto; }
-  table { width: 100%; border-collapse: collapse; margin-top: 20px;}
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-  th { background: #eee; }
-  select, input { margin: 5px; padding: 5px; }
-  button { padding: 5px 10px; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #fff8d6;
+    overflow-x: hidden;
+    padding: 20px;
+  }
+
+  h2 { color: #333; margin-bottom: 20px; text-align: center; }
+
+  .filters {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .filters label {
+    font-weight: bold;
+    color: #333;
+  }
+
+  select, input[type="date"] {
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    min-width: 150px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: #fffde6;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  }
+
+  th, td {
+    padding: 10px;
+    border: 1px solid #f0e8c2;
+    text-align: center;
+  }
+
+  th {
+    background-color: #f6b800;
+    color: white;
+    font-weight: bold;
+  }
+
+  tbody tr:nth-child(even) { background-color: #fff9d1; }
+
+  a.btn-pdf {
+    background-color: #f6b800;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+  a.btn-pdf:hover { background-color: #e0a000; }
+
+  button {
+    padding: 5px 10px;
+    border-radius: 8px;
+    background-color: #f6b800;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  button:hover { background-color: #e0a000; }
+
+  /* NUBES SVG */
+  .cloud {
+    position: absolute;
+    background: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'>\
+<circle cx='30' cy='30' r='20' fill='white'/><circle cx='50' cy='25' r='25' fill='white'/><circle cx='75' cy='30' r='20' fill='white'/></svg>") no-repeat center;
+    background-size: contain;
+    width: 200px;
+    height: 100px;
+    opacity: 0.6;
+    z-index: 1;
+  }
+
+  @keyframes cloud-left { 0% { transform: translateX(-300px); } 100% { transform: translateX(100vw); } }
+  @keyframes cloud-right { 0% { transform: translateX(100vw); } 100% { transform: translateX(-300px); } }
+
+  /* AVIONES */
+  .plane {
+    position: absolute;
+    font-size: 24px;
+    opacity: 0.85;
+    z-index: 2;
+    white-space: nowrap;
+  }
+
+  /* LIMPIADORES */
+  .cleaner {
+    position: absolute;
+    font-size: 28px;
+    opacity: 0.9;
+    z-index: 3;
+    white-space: nowrap;
+    user-select: none;
+  }
+
 </style>
 </head>
 <body>
-  <h2>Listado Formularios</h2>
 
-  <div>
-    <label>Filtrar por Fecha: <input type="date" id="filtroFecha" /></label>
-    <label>Filtrar por Matrícula: 
-      <select id="filtroMatricula">
-        <option value="">Todas</option>
-      </select>
-    </label>
-  </div>
+<h2>Listado de Formularios</h2>
 
-  <h3>Pendientes</h3>
-  <table id="tablaPendientes">
-    <thead>
-      <tr>
-        <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<div class="filters">
+  <label>Fecha: <input type="date" id="filtroFecha"></label>
+  <label>Matrícula: 
+    <select id="filtroMatricula"><option value="">Todas</option></select>
+  </label>
+</div>
 
-  <h3>Completados</h3>
-  <table id="tablaCompletados">
-    <thead>
-      <tr>
-        <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Condición</th><th>PDF</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<h3>Pendientes</h3>
+<table id="tablaPendientes">
+  <thead>
+    <tr>
+      <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h3>Completados</h3>
+<table id="tablaCompletados">
+  <thead>
+    <tr>
+      <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Condición</th><th>PDF</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
 <script>
 const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
-
 let dataPendientes = [];
 let dataCompletados = [];
 
@@ -66,7 +169,6 @@ function llenarFiltroMatricula() {
   dataPendientes.concat(dataCompletados).forEach(f => {
     if(f.Matrícula) todasMatriculas.add(f.Matrícula);
   });
-  
   selectMat.innerHTML = '<option value="">Todas</option>';
   Array.from(todasMatriculas).sort().forEach(mat => {
     const option = document.createElement('option');
@@ -108,7 +210,7 @@ function renderTabla(datos, tablaId, esPendiente){
     } else {
       fila.innerHTML = `<td>${i+1}</td><td>${formatFecha(f.Fecha)}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
         <td>${f.Conforme || ''}</td>
-        <td><a href="${f['PDF Generado URL']}" target="_blank">Ver PDF</a></td>`;
+        <td><a href="${f['PDF Generado URL']}" target="_blank" class="btn-pdf">Ver PDF</a></td>`;
     }
     tbody.appendChild(fila);
   });
@@ -124,7 +226,6 @@ async function cargarDatos(){
     let data = await resp.json();
     dataPendientes = data.pendientes;
     dataCompletados = data.completados;
-
     llenarFiltroMatricula();
     aplicarFiltrosYRender();
   } catch(err){
@@ -137,5 +238,22 @@ document.getElementById('filtroMatricula').addEventListener('change', aplicarFil
 
 window.onload = cargarDatos;
 </script>
+
+<!-- NUBES Y AVIONES OPCIONAL -->
+<script>
+const numClouds = 15;
+for (let i=0;i<numClouds;i++){
+  const cloud = document.createElement('div');
+  cloud.classList.add('cloud');
+  const top = Math.random()*80;
+  const left = Math.random()*100;
+  cloud.style.top = `${top}vh`;
+  cloud.style.left = `${left}vw`;
+  cloud.style.animation = `cloud-left ${40 + Math.random()*60}s linear infinite`;
+  cloud.style.transform = `scale(${0.6 + Math.random()*1})`;
+  document.body.appendChild(cloud);
+}
+</script>
+
 </body>
 </html>
