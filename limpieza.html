@@ -15,7 +15,7 @@
   <h2>Formulario de Limpieza</h2>
   <form id="formLimpieza" enctype="multipart/form-data">
     <label>Fecha:
-      <input type="text" name="fecha" id="fecha" readonly />
+      <input type="text" name="fecha" id="fecha" required readonly />
     </label>
     <label>Matrícula:
       <input type="text" name="matricula" required />
@@ -59,67 +59,39 @@ const canvas = document.getElementById('canvasFirma');
 const ctx = canvas.getContext('2d');
 let drawing = false;
 
-canvas.addEventListener('mousedown', (e) => {
-  drawing = true;
-  ctx.beginPath();
-  ctx.moveTo(e.offsetX, e.offsetY);
-});
-canvas.addEventListener('mouseup', () => drawing = false);
-canvas.addEventListener('mouseout', () => drawing = false);
-canvas.addEventListener('mousemove', (e) => {
-  if(drawing){
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.stroke();
-  }
-});
-canvas.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  ctx.beginPath();
-  ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
-  drawing = true;
-});
-canvas.addEventListener('touchend', (e) => { e.preventDefault(); drawing = false; });
-canvas.addEventListener('touchmove', (e) => {
-  e.preventDefault();
-  if(!drawing) return;
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
-  ctx.stroke();
-});
+// Dibujo firma
+canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX,e.offsetY); });
+canvas.addEventListener('mouseup', e => drawing=false);
+canvas.addEventListener('mouseout', e => drawing=false);
+canvas.addEventListener('mousemove', e => { if(drawing){ ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke(); } });
 
-document.getElementById('clearFirma').onclick = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+// Táctil
+canvas.addEventListener('touchstart', e => { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; ctx.beginPath(); ctx.moveTo(touch.clientX-rect.left,touch.clientY-rect.top); drawing=true; });
+canvas.addEventListener('touchend', e => { e.preventDefault(); drawing=false; });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if(!drawing) return; const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; ctx.lineTo(touch.clientX-rect.left,touch.clientY-rect.top); ctx.stroke(); });
 
-// Función para convertir fecha a DD/MM/YYYY
-function convertirFecha(fechaStr) {
-  if(!fechaStr) return '';
-  const partes = fechaStr.split('-'); // espera YYYY-MM-DD
-  if(partes.length !== 3) return '';
-  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+document.getElementById('clearFirma').onclick = () => ctx.clearRect(0,0,canvas.width,canvas.height);
+
+// Formato fecha DD/MM/YYYY
+function setFechaHoy() {
+  const hoy = new Date();
+  const dd = ('0' + hoy.getDate()).slice(-2);
+  const mm = ('0' + (hoy.getMonth()+1)).slice(-2);
+  const yyyy = hoy.getFullYear();
+  document.getElementById('fecha').value = `${dd}/${mm}/${yyyy}`;
 }
 
-// Cargar fecha automáticamente al abrir el formulario
+// Inicializar al cargar
 window.onload = () => {
-  const hoy = new Date();
-  const yyyy = hoy.getFullYear();
-  const mm = ('0' + (hoy.getMonth()+1)).slice(-2);
-  const dd = ('0' + hoy.getDate()).slice(-2);
-  document.getElementById('fecha').value = `${dd}/${mm}/${yyyy}`;
+  setFechaHoy();
 };
 
-document.getElementById('formLimpieza').onsubmit = async (e) => {
+document.getElementById('formLimpieza').onsubmit = async e => {
   e.preventDefault();
-
-  // Validar que haya dibujo en canvas
+  // Validar firma
   const blank = document.createElement('canvas');
-  blank.width = canvas.width;
-  blank.height = canvas.height;
-  if(canvas.toDataURL() === blank.toDataURL()){
-    alert('Por favor, firme antes de enviar');
-    return;
-  }
+  blank.width=canvas.width; blank.height=canvas.height;
+  if(canvas.toDataURL()===blank.toDataURL()){ alert('Por favor, firme antes de enviar'); return; }
 
   const formData = new FormData(e.target);
   formData.append('firma', canvas.toDataURL());
@@ -127,27 +99,19 @@ document.getElementById('formLimpieza').onsubmit = async (e) => {
 
   const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
 
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      body: formData
-    });
+  try{
+    const resp = await fetch(url,{method:'POST',body:formData});
     const data = await resp.json();
-    if(data.status === 'ok'){
-      alert('Formulario enviado correctamente! ID: ' + data.id);
+    if(data.status==='ok'){
+      alert('Formulario enviado correctamente! ID: '+data.id);
       e.target.reset();
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Volver a poner fecha actual en DD/MM/YYYY
-      const hoy = new Date();
-      const yyyy = hoy.getFullYear();
-      const mm = ('0' + (hoy.getMonth()+1)).slice(-2);
-      const dd = ('0' + hoy.getDate()).slice(-2);
-      document.getElementById('fecha').value = `${dd}/${mm}/${yyyy}`;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      setFechaHoy(); // Volver a setear la fecha actual
     } else {
-      alert('Error: ' + data.message);
+      alert('Error: '+data.message);
     }
-  } catch(err){
-    alert('Error al enviar: ' + err.message);
+  }catch(err){
+    alert('Error al enviar: '+err.message);
   }
 };
 </script>
