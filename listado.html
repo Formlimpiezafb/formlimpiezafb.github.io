@@ -119,7 +119,7 @@ function renderTabla(datos, tablaId, esPendiente){
         <td><button onclick="abrirRecepcion('${f.ID}')">Abrir Recepción</button></td>`;
     } else {
       let condicion = f["Conforme?"] || '';
-      let pdfUrl = f["T"] || '';
+      let pdfUrl = f["PDF Generado URL"] || '';
       fila.innerHTML = `<td>${i+1}</td><td>${formatFecha(f.Fecha)}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
                         <td>${condicion}</td>
                         <td>${pdfUrl ? `<button class="pdf-btn" onclick="mostrarPDF('${pdfUrl}')">Ver PDF</button>` : ''}</td>`;
