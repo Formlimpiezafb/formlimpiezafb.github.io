@@ -19,7 +19,7 @@
   <table id="tablaPendientes">
     <thead>
       <tr>
-        <th>ID</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th>
+        <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -29,7 +29,7 @@
   <table id="tablaCompletados">
     <thead>
       <tr>
-        <th>ID</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>PDF</th>
+        <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>PDF</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -37,6 +37,14 @@
 
 <script>
 const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
+
+// Función para convertir YYYY-MM-DD a DD/MM/YYYY
+function formatFecha(fechaStr){
+  if(!fechaStr) return '';
+  const partes = fechaStr.split('-');
+  if(partes.length !== 3) return fechaStr;
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
 
 async function cargarDatos(){
   try {
@@ -49,16 +57,22 @@ async function cargarDatos(){
     tbodyPend.innerHTML = '';
     tbodyComp.innerHTML = '';
 
-    data.pendientes.forEach(f => {
+    data.pendientes.forEach((f, index) => {
       let tr = document.createElement('tr');
-      tr.innerHTML = `<td>${f.ID}</td><td>${f.Fecha}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
+      tr.innerHTML = `<td>${index + 1}</td>
+        <td>${formatFecha(f.Fecha)}</td>
+        <td>${f.Matrícula}</td>
+        <td>${f.Estado}</td>
         <td><button onclick="abrirRecepcion('${f.ID}')">Abrir Recepción</button></td>`;
       tbodyPend.appendChild(tr);
     });
 
-    data.completados.forEach(f => {
+    data.completados.forEach((f, index) => {
       let tr = document.createElement('tr');
-      tr.innerHTML = `<td>${f.ID}</td><td>${f.Fecha}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
+      tr.innerHTML = `<td>${index + 1}</td>
+        <td>${formatFecha(f.Fecha)}</td>
+        <td>${f.Matrícula}</td>
+        <td>${f.Estado}</td>
         <td><a href="${f['PDF Generado URL']}" target="_blank">Ver PDF</a></td>`;
       tbodyComp.appendChild(tr);
     });
