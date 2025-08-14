@@ -143,12 +143,26 @@ async function cargarFormularioPorId(id){
     document.getElementById('formRecepcion').style.display = 'block';
     document.getElementById('formIdHidden').value = id;
 
+    // Función auxiliar para convertir fecha DD/MM/AAAA a YYYY-MM-DD
+    function formatFechaInput(fechaStr) {
+      if(!fechaStr) return '';
+      const partes = fechaStr.split('/');
+      if(partes.length !== 3) return '';
+      return `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}`;
+    }
+
+    // Función auxiliar para hora HH:MM
+    function formatHoraInput(horaStr){
+      if(!horaStr) return '';
+      return horaStr.length === 5 ? horaStr : horaStr.padStart(5,'0');
+    }
+
     // Campos limpieza
-    document.getElementById('fecha').value = formData.Fecha;
+    document.getElementById('fecha').value = formatFechaInput(formData.Fecha);
     document.getElementById('matricula').value = formData.Matrícula;
     document.getElementById('posicion').value = formData.Posición;
-    document.getElementById('horaInicio').value = formData['Hora Inicio'];
-    document.getElementById('horaFin').value = formData['Hora Fin'];
+    document.getElementById('horaInicio').value = formatHoraInput(formData['Hora Inicio']);
+    document.getElementById('horaFin').value = formatHoraInput(formData['Hora Fin']);
     document.getElementById('tipoLimpieza').value = formData['Tipo Limpieza'];
     document.getElementById('responsable').value = formData.Responsable;
     document.getElementById('observaciones').value = formData.Observaciones;
@@ -157,7 +171,6 @@ async function cargarFormularioPorId(id){
     alert('Error al cargar datos: ' + err.message);
   }
 }
-
 window.onload = () => {
   const params = new URLSearchParams(window.location.search);
   if(params.has('id')){
