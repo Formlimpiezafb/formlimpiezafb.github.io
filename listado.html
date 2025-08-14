@@ -8,12 +8,15 @@
   table { width: 100%; border-collapse: collapse; margin-top: 20px;}
   th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
   th { background: #eee; }
+  input { margin-bottom: 10px; padding: 5px; width: 200px; }
   button { padding: 5px 10px; }
 </style>
 </head>
 <body>
   <h2>Listado Formularios</h2>
-  <button onclick="cargarDatos()">Cargar Formularios</button>
+
+  <label>Buscar: <input type="text" id="filtroBusqueda" placeholder="Filtrar por matrícula o estado..." /></label>
+  <button onclick="cargarDatos()">Recargar Formularios</button>
 
   <h3>Pendientes</h3>
   <table id="tablaPendientes">
@@ -29,7 +32,7 @@
   <table id="tablaCompletados">
     <thead>
       <tr>
-        <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>PDF</th>
+        <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Condición</th><th>PDF</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -54,6 +57,8 @@ async function cargarDatos(){
     let resp = await fetch(url + '?action=list');
     let data = await resp.json();
 
+    const filtro = document.getElementById('filtroBusqueda').value.toLowerCase();
+
     let tbodyPend = document.querySelector('#tablaPendientes tbody');
     let tbodyComp = document.querySelector('#tablaCompletados tbody');
 
@@ -62,6 +67,10 @@ async function cargarDatos(){
 
     // Pendientes
     data.pendientes.forEach((f, index) => {
+      const mat = f.Matrícula ? f.Matrícula.toLowerCase() : '';
+      const estado = f.Estado ? f.Estado.toLowerCase() : '';
+      if(filtro && !mat.includes(filtro) && !estado.includes(filtro)) return;
+
       let tr = document.createElement('tr');
       tr.innerHTML = `<td>${index + 1}</td>
         <td>${formatFecha(f.Fecha)}</td>
@@ -73,11 +82,16 @@ async function cargarDatos(){
 
     // Completados
     data.completados.forEach((f, index) => {
+      const mat = f.Matrícula ? f.Matrícula.toLowerCase() : '';
+      const estado = f.Estado ? f.Estado.toLowerCase() : '';
+      if(filtro && !mat.includes(filtro) && !estado.includes(filtro)) return;
+
       let tr = document.createElement('tr');
       tr.innerHTML = `<td>${index + 1}</td>
         <td>${formatFecha(f.Fecha)}</td>
         <td>${f.Matrícula}</td>
         <td>${f.Estado}</td>
+        <td>${f.Conforme || ''}</td>
         <td><a href="${f['PDF Generado URL']}" target="_blank">Ver PDF</a></td>`;
       tbodyComp.appendChild(tr);
     });
@@ -90,6 +104,11 @@ async function cargarDatos(){
 function abrirRecepcion(id){
   window.open('recepcion.html?id=' + encodeURIComponent(id), '_blank');
 }
+
+// Filtrar al escribir
+document.getElementById('filtroBusqueda').addEventListener('input', () => {
+  cargarDatos();
+});
 
 window.onload = () => {
   cargarDatos();
