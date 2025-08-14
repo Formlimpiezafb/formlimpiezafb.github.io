@@ -95,7 +95,7 @@
     width: 200px;
     height: 100px;
     opacity: 0.6;
-    z-index: 1; /* detrás del contenido */
+    z-index: 1;
   }
 
   @keyframes cloud-left { 0% { transform: translateX(-300px); } 100% { transform: translateX(100vw); } }
@@ -210,22 +210,22 @@ function renderTabla(datos, tablaId, esPendiente){
   datos.forEach((f,i)=>{
     const fila = document.createElement('tr');
     if(esPendiente){
-      fila.innerHTML = `<td>${i+1}</td>
-        <td>${formatFecha(f.Fecha)}</td>
-        <td>${f.Matrícula}</td>
-        <td>${f.Estado}</td>
+      fila.innerHTML = `<td>${i+1}</td><td>${formatFecha(f.Fecha)}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
         <td><button onclick="abrirRecepcion('${f.ID}')">Abrir Recepción</button></td>`;
     } else {
-      fila.innerHTML = `<td>${i+1}</td>
-        <td>${formatFecha(f.Fecha)}</td>
-        <td>${f.Matrícula}</td>
-        <td>${f.Estado}</td>
+      let pdfLink = '';
+      if(f['PDF Generado URL']){
+        const match = f['PDF Generado URL'].match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if(match){
+          const fileId = match[1];
+          pdfLink = `https://drive.google.com/uc?export=view&id=${fileId}`;
+        } else {
+          pdfLink = f['PDF Generado URL'];
+        }
+      }
+      fila.innerHTML = `<td>${i+1}</td><td>${formatFecha(f.Fecha)}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
         <td>${f.Conforme || ''}</td>
-        <td>
-          <a href="${f['PDF Generado URL'] || '#'}" target="_blank" class="btn-pdf">
-            ${f['PDF Generado URL'] ? 'Ver PDF' : 'No disponible'}
-          </a>
-        </td>`;
+        <td>${pdfLink ? `<a href="${pdfLink}" target="_blank" class="btn-pdf">Ver PDF</a>` : ''}</td>`;
     }
     tbody.appendChild(fila);
   });
