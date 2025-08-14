@@ -4,20 +4,25 @@
 <meta charset="UTF-8" />
 <title>Listado Formularios</title>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 950px; margin: auto; }
+  body { font-family: Arial, sans-serif; max-width: 1000px; margin: auto; }
   table { width: 100%; border-collapse: collapse; margin-top: 20px;}
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; cursor: pointer; }
-  th { background: #eee; position: relative; }
-  th span.arrow { font-size: 0.8em; margin-left: 5px; }
-  input { margin: 5px 10px 10px 0; padding: 5px; width: 180px; }
-  a { text-decoration: none; color: blue; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+  th { background: #eee; }
+  select, input { margin: 5px; padding: 5px; }
+  button { padding: 5px 10px; }
 </style>
 </head>
 <body>
   <h2>Listado Formularios</h2>
 
-  <label>Filtrar por Fecha: <input type="date" id="filtroFecha" /></label>
-  <label>Filtrar por Matrícula: <input type="text" id="filtroMatricula" placeholder="Matrícula..." /></label>
+  <div>
+    <label>Filtrar por Fecha: <input type="date" id="filtroFecha" /></label>
+    <label>Filtrar por Matrícula: 
+      <select id="filtroMatricula">
+        <option value="">Todas</option>
+      </select>
+    </label>
+  </div>
 
   <h3>Pendientes</h3>
   <table id="tablaPendientes">
@@ -41,19 +46,76 @@
 
 <script>
 const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
+
 let dataPendientes = [];
 let dataCompletados = [];
-let sortPend = {};
-let sortComp = {};
 
-function formatFecha(fechaStr){
+function formatFecha(fechaStr) {
   if(!fechaStr) return '';
-  const fecha = new Date(fechaStr);
-  if(isNaN(fecha)) return fechaStr;
-  const dd = String(fecha.getDate()).padStart(2,'0');
-  const mm = String(fecha.getMonth() + 1).padStart(2,'0');
-  const yyyy = fecha.getFullYear();
+  const d = new Date(fechaStr);
+  if(isNaN(d)) return '';
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yyyy = d.getFullYear();
   return `${dd}/${mm}/${yyyy}`;
+}
+
+function llenarFiltroMatricula() {
+  const selectMat = document.getElementById('filtroMatricula');
+  const todasMatriculas = new Set();
+  dataPendientes.concat(dataCompletados).forEach(f => {
+    if(f.Matrícula) todasMatriculas.add(f.Matrícula);
+  });
+  
+  selectMat.innerHTML = '<option value="">Todas</option>';
+  Array.from(todasMatriculas).sort().forEach(mat => {
+    const option = document.createElement('option');
+    option.value = mat;
+    option.textContent = mat;
+    selectMat.appendChild(option);
+  });
+}
+
+function aplicarFiltrosYRender() {
+  const filtroFecha = document.getElementById('filtroFecha').value;
+  const filtroMatricula = document.getElementById('filtroMatricula').value;
+
+  const filtrar = (f) => {
+    let coincide = true;
+    if(filtroFecha) {
+      const fForm = new Date(f.Fecha);
+      const fFiltro = new Date(filtroFecha);
+      coincide = coincide && (fForm.toDateString() === fFiltro.toDateString());
+    }
+    if(filtroMatricula) {
+      coincide = coincide && (f.Matrícula === filtroMatricula);
+    }
+    return coincide;
+  };
+
+  renderTabla(dataPendientes.filter(filtrar), 'tablaPendientes', true);
+  renderTabla(dataCompletados.filter(filtrar), 'tablaCompletados', false);
+}
+
+function renderTabla(datos, tablaId, esPendiente){
+  const tbody = document.querySelector(`#${tablaId} tbody`);
+  tbody.innerHTML = '';
+  datos.forEach((f,i)=>{
+    const fila = document.createElement('tr');
+    if(esPendiente){
+      fila.innerHTML = `<td>${i+1}</td><td>${formatFecha(f.Fecha)}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
+        <td><button onclick="abrirRecepcion('${f.ID}')">Abrir Recepción</button></td>`;
+    } else {
+      fila.innerHTML = `<td>${i+1}</td><td>${formatFecha(f.Fecha)}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
+        <td>${f.Conforme || ''}</td>
+        <td><a href="${f['PDF Generado URL']}" target="_blank">Ver PDF</a></td>`;
+    }
+    tbody.appendChild(fila);
+  });
+}
+
+function abrirRecepcion(id){
+  window.open('recepcion.html?id=' + encodeURIComponent(id), '_blank');
 }
 
 async function cargarDatos(){
@@ -62,86 +124,16 @@ async function cargarDatos(){
     let data = await resp.json();
     dataPendientes = data.pendientes;
     dataCompletados = data.completados;
+
+    llenarFiltroMatricula();
     aplicarFiltrosYRender();
   } catch(err){
     alert('Error al cargar listado: ' + err.message);
   }
 }
 
-function aplicarFiltrosYRender(){
-  const filtroFecha = document.getElementById('filtroFecha').value;
-  const filtroMat = document.getElementById('filtroMatricula').value.toLowerCase();
-
-  let tbodyPend = document.querySelector('#tablaPendientes tbody');
-  let tbodyComp = document.querySelector('#tablaCompletados tbody');
-  tbodyPend.innerHTML = '';
-  tbodyComp.innerHTML = '';
-
-  dataPendientes.forEach((f, index) => {
-    const fechaForm = formatFecha(f.Fecha);
-    const mat = f.Matrícula ? f.Matrícula.toLowerCase() : '';
-    const estado = f.Estado ? f.Estado.toLowerCase() : '';
-    if(filtroFecha && fechaForm !== formatFecha(filtroFecha)) return;
-    if(filtroMat && !mat.includes(filtroMat)) return;
-
-    let tr = document.createElement('tr');
-    tr.innerHTML = `<td>${index + 1}</td>
-      <td>${fechaForm}</td>
-      <td>${f.Matrícula}</td>
-      <td>${f.Estado}</td>
-      <td><button onclick="abrirRecepcion('${f.ID}')">Abrir Recepción</button></td>`;
-    tbodyPend.appendChild(tr);
-  });
-
-  dataCompletados.forEach((f, index) => {
-    const fechaForm = formatFecha(f.Fecha);
-    const mat = f.Matrícula ? f.Matrícula.toLowerCase() : '';
-    const estado = f.Estado ? f.Estado.toLowerCase() : '';
-    if(filtroFecha && fechaForm !== formatFecha(filtroFecha)) return;
-    if(filtroMat && !mat.includes(filtroMat)) return;
-
-    let tr = document.createElement('tr');
-    tr.innerHTML = `<td>${index + 1}</td>
-      <td>${fechaForm}</td>
-      <td>${f.Matrícula}</td>
-      <td>${f.Estado}</td>
-      <td>${f.Conforme || f['Condición'] || ''}</td>
-      <td><a href="${f['PDF Generado URL']}" target="_blank">Ver PDF</a></td>`;
-    tbodyComp.appendChild(tr);
-  });
-}
-
-function abrirRecepcion(id){
-  window.open('recepcion.html?id=' + encodeURIComponent(id), '_blank');
-}
-
-// Eventos de filtros
-document.getElementById('filtroFecha').addEventListener('input', aplicarFiltrosYRender);
-document.getElementById('filtroMatricula').addEventListener('input', aplicarFiltrosYRender);
-
-// Ordenamiento
-function ordenarTabla(dataArray, key, isPendientes=true){
-  let sortObj = isPendientes ? sortPend : sortComp;
-  let asc = sortObj[key] === undefined ? true : !sortObj[key];
-  sortObj[key] = asc;
-
-  dataArray.sort((a,b)=>{
-    let va = a[key] || '';
-    let vb = b[key] || '';
-    if(key === 'Fecha'){ va = new Date(va); vb = new Date(vb); }
-    if(va < vb) return asc ? -1 : 1;
-    if(va > vb) return asc ? 1 : -1;
-    return 0;
-  });
-
-  const ths = isPendientes ? document.querySelectorAll('#tablaPendientes th') : document.querySelectorAll('#tablaCompletados th');
-  ths.forEach(th => { let span = th.querySelector('.arrow'); if(span) th.removeChild(span); });
-  ths.forEach(th=>{ if(th.innerText.trim() === key){ let arrow = document.createElement('span'); arrow.className='arrow'; arrow.innerHTML=asc?'▲':'▼'; th.appendChild(arrow); } });
-  aplicarFiltrosYRender();
-}
-
-document.querySelectorAll('#tablaPendientes th').forEach((th, idx)=>{ if(idx===4) return; th.addEventListener('click', ()=>ordenarTabla(dataPendientes, th.innerText.trim(), true)); });
-document.querySelectorAll('#tablaCompletados th').forEach((th, idx)=>{ if(idx===5) return; th.addEventListener('click', ()=>ordenarTabla(dataCompletados, th.innerText.trim(), false)); });
+document.getElementById('filtroFecha').addEventListener('change', aplicarFiltrosYRender);
+document.getElementById('filtroMatricula').addEventListener('change', aplicarFiltrosYRender);
 
 window.onload = cargarDatos;
 </script>
