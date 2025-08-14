@@ -11,14 +11,16 @@
   .filters { margin-bottom: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; position: relative; z-index: 10; }
   .filters label { font-weight: bold; color: #333; }
   select, input[type="date"] { padding: 8px; border-radius: 8px; border: 1px solid #ccc; min-width: 150px; }
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; background-color: #fffde6; border-radius: 10px; overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.1); position: relative; z-index: 10; }
-  th, td { padding: 10px; border: 1px solid #f0e8c2; text-align: center; }
-  th { background-color: #f6b800; color: white; font-weight: bold; }
-  tbody tr:nth-child(even) { background-color: #fff9d1; }
-  button.pdf-btn { background-color: #f6b800; color: white; padding: 5px 10px; border-radius: 8px; border: none; cursor: pointer; transition: background-color 0.3s; }
-  button.pdf-btn:hover { background-color: #e0a000; }
-  button { padding: 5px 10px; border-radius: 8px; background-color: #f6b800; color: white; border: none; cursor: pointer; transition: background-color 0.3s; }
-  button:hover { background-color: #e0a000; }
+
+  /* Contenedor scroll para tablas */
+  .tabla-scroll { overflow-y: auto; display: block; margin-bottom: 30px; border-radius: 10px; }
+  .tabla-scroll table { width: 100%; border-collapse: collapse; }
+  .tabla-scroll thead { position: sticky; top: 0; background-color: #f6b800; z-index: 5; }
+  .tabla-scroll th, .tabla-scroll td { padding: 10px; border: 1px solid #f0e8c2; text-align: center; }
+  .tabla-scroll tbody tr:nth-child(even) { background-color: #fff9d1; }
+
+  button.pdf-btn, button { background-color: #f6b800; color: white; padding: 5px 10px; border-radius: 8px; border: none; cursor: pointer; transition: background-color 0.3s; }
+  button.pdf-btn:hover, button:hover { background-color: #e0a000; }
 
   /* NUBES */
   .cloud { position: absolute; background: url("data:image/svg+xml;utf8,\
@@ -52,20 +54,24 @@
 </div>
 
 <h3>Pendientes</h3>
-<table id="tablaPendientes">
-  <thead>
-    <tr><th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th></tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<div class="tabla-scroll" id="scrollPendientes">
+  <table id="tablaPendientes">
+    <thead>
+      <tr><th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
 <h3>Completados</h3>
-<table id="tablaCompletados">
-  <thead>
-    <tr><th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Condición</th><th>PDF</th></tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<div class="tabla-scroll" id="scrollCompletados">
+  <table id="tablaCompletados">
+    <thead>
+      <tr><th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Condición</th><th>PDF</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
 <div id="pdfModal" onclick="cerrarModal()">
   <iframe id="pdfFrame"></iframe>
@@ -107,6 +113,7 @@ function aplicarFiltrosYRender() {
   };
   renderTabla(dataPendientes.filter(filtrar), 'tablaPendientes', true);
   renderTabla(dataCompletados.filter(filtrar), 'tablaCompletados', false);
+  ajustarAlturaTablas(); // reajustar altura al renderizar
 }
 
 function renderTabla(datos, tablaId, esPendiente){
@@ -130,7 +137,6 @@ function renderTabla(datos, tablaId, esPendiente){
 
 function abrirRecepcion(id){
   const nuevaVentana = window.open('recepcion.html?id=' + encodeURIComponent(id), '_blank');
-  // Enviar referencia para refresco automático
   if(nuevaVentana) { nuevaVentana.refrescarListado = refrescarDatos; }
 }
 
@@ -147,7 +153,6 @@ async function cargarDatos(){
   }
 }
 
-// Refresco automático cada 20 segundos
 async function refrescarDatos() { await cargarDatos(); }
 
 document.getElementById('filtroFecha').addEventListener('change', aplicarFiltrosYRender);
@@ -168,6 +173,20 @@ function mostrarPDF(url){
 }
 function cerrarModal(){ document.getElementById('pdfModal').style.display = 'none'; document.getElementById('pdfFrame').src = ''; }
 
+// Ajustar altura de tablas para mostrar 6 filas
+function ajustarAlturaTablas() {
+  const scrollContainers = [document.getElementById('scrollPendientes'), document.getElementById('scrollCompletados')];
+  scrollContainers.forEach(sc => {
+    const fila = sc.querySelector('tbody tr');
+    if(fila) {
+      const alturaFila = fila.offsetHeight;
+      sc.style.maxHeight = (alturaFila * 6) + 'px';
+    } else {
+      sc.style.maxHeight = '240px'; // fallback
+    }
+  });
+}
+
 // NUBES
 const numClouds = 15;
 for (let i=0;i<numClouds;i++){
@@ -181,6 +200,5 @@ for (let i=0;i<numClouds;i++){
   document.body.appendChild(cloud);
 }
 </script>
-
 </body>
 </html>
