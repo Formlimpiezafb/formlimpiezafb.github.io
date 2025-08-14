@@ -83,23 +83,41 @@
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'>\
 <circle cx='30' cy='30' r='20' fill='white'/><circle cx='50' cy='25' r='25' fill='white'/><circle cx='75' cy='30' r='20' fill='white'/></svg>") no-repeat center;
     background-size: contain;
-    width: 200px;
-    height: 100px;
     opacity: 0.5;
     z-index: 1;
   }
 
   @keyframes cloud-left {
-    0% { transform: translateX(-250px); }
-    100% { transform: translateX(100vw); }
+    0% { transform: translateX(-250px) translateY(0px); }
+    50% { transform: translateX(50vw) translateY(10px); }
+    100% { transform: translateX(100vw) translateY(0px); }
   }
+
   @keyframes cloud-right {
-    0% { transform: translateX(100vw); }
-    100% { transform: translateX(-250px); }
+    0% { transform: translateX(100vw) translateY(0px); }
+    50% { transform: translateX(50vw) translateY(-10px); }
+    100% { transform: translateX(-250px) translateY(0px); }
+  }
+
+  /* LOGO SVG */
+  .logo {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 120px;
+    height: 60px;
+    background: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'>\
+<circle cx='30' cy='30' r='20' fill='white'/><circle cx='50' cy='25' r='25' fill='white'/><circle cx='75' cy='30' r='20' fill='white'/></svg>") no-repeat center;
+    background-size: contain;
+    z-index: 20;
   }
 </style>
 </head>
 <body>
+
+<!-- LOGO -->
+<div class="logo"></div>
 
 <!-- NUBES -->
 <script>
@@ -109,13 +127,14 @@
     cloud.classList.add('cloud');
     const top = Math.random()*70;
     const scale = 0.5 + Math.random()*1;
+    const width = 150 + Math.random()*150;
+    const height = 75 + Math.random()*75;
     cloud.style.top = `${top}vh`;
+    cloud.style.width = `${width}px`;
+    cloud.style.height = `${height}px`;
     cloud.style.transform = `scale(${scale})`;
     cloud.style.opacity = 0.4 + Math.random()*0.4;
-    cloud.style.width = `${150 + Math.random()*150}px`;
-    cloud.style.height = `${75 + Math.random()*75}px`;
 
-    // dirección aleatoria
     const direction = Math.random() > 0.5 ? 'left' : 'right';
     cloud.style.animation = `cloud-${direction} ${30 + Math.random()*60}s linear infinite`;
     if(direction === 'left') cloud.style.left = `-${Math.random()*300}px`;
