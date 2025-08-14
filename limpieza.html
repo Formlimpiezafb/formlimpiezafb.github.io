@@ -12,26 +12,25 @@
 </style>
 </head>
 <body>
-  <h2>Formulario Limpieza</h2>
-
+  <h2>Formulario de Limpieza</h2>
   <form id="formLimpieza" enctype="multipart/form-data">
-    <label>Fecha limpieza:
-      <input type="date" name="fecha" id="fecha" required />
+    <label>Fecha:
+      <input type="date" name="fecha" required />
     </label>
     <label>Matrícula:
-      <input type="text" name="matricula" id="matricula" required />
+      <input type="text" name="matricula" required />
     </label>
     <label>Posición:
-      <input type="text" name="posicion" id="posicion" required />
+      <input type="text" name="posicion" required />
     </label>
-    <label>Hora inicio:
-      <input type="time" name="horaInicio" id="horaInicio" required />
+    <label>Hora Inicio:
+      <input type="time" name="horaInicio" required />
     </label>
-    <label>Hora fin:
-      <input type="time" name="horaFin" id="horaFin" required />
+    <label>Hora Fin:
+      <input type="time" name="horaFin" required />
     </label>
-    <label>Tipo de limpieza:
-      <select name="tipoLimpieza" id="tipoLimpieza" required>
+    <label>Tipo de Limpieza:
+      <select name="tipoLimpieza" required>
         <option value="">Seleccione</option>
         <option value="Superficial">Superficial</option>
         <option value="Profunda">Profunda</option>
@@ -39,28 +38,23 @@
       </select>
     </label>
     <label>Responsable limpieza:
-      <input type="text" name="responsable" id="responsable" required />
+      <input type="text" name="responsable" required />
     </label>
-    <label>Observaciones limpieza:
-      <textarea name="observaciones" id="observaciones" rows="3"></textarea>
-    </label>
-
     <label>Firma (tocar o click y dibujar):</label>
     <canvas id="canvasFirma" width="400" height="150"></canvas>
     <button type="button" id="clearFirma">Limpiar Firma</button>
 
+    <label>Observaciones:
+      <textarea name="observaciones" rows="3"></textarea>
+    </label>
     <label>Adjuntar archivos:
       <input type="file" name="files" multiple />
     </label>
-
-    <input type="hidden" name="formType" value="limpieza" />
 
     <button type="submit">Enviar Limpieza</button>
   </form>
 
 <script>
-const url = 'TU_URL_DE_APPS_SCRIPT_AQUI';
-
 const canvas = document.getElementById('canvasFirma');
 const ctx = canvas.getContext('2d');
 let drawing = false;
@@ -70,10 +64,10 @@ canvas.addEventListener('mousedown', (e) => {
   ctx.beginPath();
   ctx.moveTo(e.offsetX, e.offsetY);
 });
-canvas.addEventListener('mouseup', () => {
+canvas.addEventListener('mouseup', (e) => {
   drawing = false;
 });
-canvas.addEventListener('mouseout', () => {
+canvas.addEventListener('mouseout', (e) => {
   drawing = false;
 });
 canvas.addEventListener('mousemove', (e) => {
@@ -82,6 +76,8 @@ canvas.addEventListener('mousemove', (e) => {
     ctx.stroke();
   }
 });
+
+// Para soporte táctil:
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault();
   const rect = canvas.getBoundingClientRect();
@@ -110,6 +106,7 @@ document.getElementById('clearFirma').onclick = () => {
 document.getElementById('formLimpieza').onsubmit = async (e) => {
   e.preventDefault();
 
+  // Validar que haya dibujo en canvas
   const blank = document.createElement('canvas');
   blank.width = canvas.width;
   blank.height = canvas.height;
@@ -119,13 +116,21 @@ document.getElementById('formLimpieza').onsubmit = async (e) => {
   }
 
   const formData = new FormData(e.target);
+  // Agregar la firma en base64
   formData.append('firma', canvas.toDataURL());
+  formData.append('formType', 'limpieza');
+
+  // Enviar a Apps Script (poné tu URL)
+  const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
 
   try {
-    const resp = await fetch(url, {method:'POST', body: formData});
+    const resp = await fetch(url, {
+      method: 'POST',
+      body: formData
+    });
     const data = await resp.json();
     if(data.status === 'ok'){
-      alert('Limpieza enviada correctamente. ID: ' + data.id);
+      alert('Formulario enviado correctamente! ID: ' + data.id);
       e.target.reset();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     } else {
