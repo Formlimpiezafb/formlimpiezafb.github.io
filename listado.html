@@ -4,19 +4,20 @@
 <meta charset="UTF-8" />
 <title>Listado Formularios</title>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 900px; margin: auto; }
+  body { font-family: Arial, sans-serif; max-width: 950px; margin: auto; }
   table { width: 100%; border-collapse: collapse; margin-top: 20px;}
   th, td { border: 1px solid #ccc; padding: 8px; text-align: center; cursor: pointer; }
   th { background: #eee; position: relative; }
   th span.arrow { font-size: 0.8em; margin-left: 5px; }
-  input { margin-bottom: 10px; padding: 5px; width: 200px; }
+  input { margin: 5px 10px 10px 0; padding: 5px; width: 180px; }
   a { text-decoration: none; color: blue; }
 </style>
 </head>
 <body>
   <h2>Listado Formularios</h2>
 
-  <label>Buscar: <input type="text" id="filtroBusqueda" placeholder="Filtrar por matrícula o estado..." /></label>
+  <label>Filtrar por Fecha: <input type="date" id="filtroFecha" /></label>
+  <label>Filtrar por Matrícula: <input type="text" id="filtroMatricula" placeholder="Matrícula..." /></label>
 
   <h3>Pendientes</h3>
   <table id="tablaPendientes">
@@ -45,7 +46,6 @@ let dataCompletados = [];
 let sortPend = {};
 let sortComp = {};
 
-// Convertir fecha ISO a DD/MM/AAAA
 function formatFecha(fechaStr){
   if(!fechaStr) return '';
   const fecha = new Date(fechaStr);
@@ -60,18 +60,17 @@ async function cargarDatos(){
   try {
     let resp = await fetch(url + '?action=list');
     let data = await resp.json();
-
     dataPendientes = data.pendientes;
     dataCompletados = data.completados;
-
-    aplicarFiltroYRender();
+    aplicarFiltrosYRender();
   } catch(err){
     alert('Error al cargar listado: ' + err.message);
   }
 }
 
-function aplicarFiltroYRender(){
-  const filtro = document.getElementById('filtroBusqueda').value.toLowerCase();
+function aplicarFiltrosYRender(){
+  const filtroFecha = document.getElementById('filtroFecha').value;
+  const filtroMat = document.getElementById('filtroMatricula').value.toLowerCase();
 
   let tbodyPend = document.querySelector('#tablaPendientes tbody');
   let tbodyComp = document.querySelector('#tablaCompletados tbody');
@@ -79,13 +78,15 @@ function aplicarFiltroYRender(){
   tbodyComp.innerHTML = '';
 
   dataPendientes.forEach((f, index) => {
+    const fechaForm = formatFecha(f.Fecha);
     const mat = f.Matrícula ? f.Matrícula.toLowerCase() : '';
     const estado = f.Estado ? f.Estado.toLowerCase() : '';
-    if(filtro && !mat.includes(filtro) && !estado.includes(filtro)) return;
+    if(filtroFecha && fechaForm !== formatFecha(filtroFecha)) return;
+    if(filtroMat && !mat.includes(filtroMat)) return;
 
     let tr = document.createElement('tr');
     tr.innerHTML = `<td>${index + 1}</td>
-      <td>${formatFecha(f.Fecha)}</td>
+      <td>${fechaForm}</td>
       <td>${f.Matrícula}</td>
       <td>${f.Estado}</td>
       <td><button onclick="abrirRecepcion('${f.ID}')">Abrir Recepción</button></td>`;
@@ -93,13 +94,15 @@ function aplicarFiltroYRender(){
   });
 
   dataCompletados.forEach((f, index) => {
+    const fechaForm = formatFecha(f.Fecha);
     const mat = f.Matrícula ? f.Matrícula.toLowerCase() : '';
     const estado = f.Estado ? f.Estado.toLowerCase() : '';
-    if(filtro && !mat.includes(filtro) && !estado.includes(filtro)) return;
+    if(filtroFecha && fechaForm !== formatFecha(filtroFecha)) return;
+    if(filtroMat && !mat.includes(filtroMat)) return;
 
     let tr = document.createElement('tr');
     tr.innerHTML = `<td>${index + 1}</td>
-      <td>${formatFecha(f.Fecha)}</td>
+      <td>${fechaForm}</td>
       <td>${f.Matrícula}</td>
       <td>${f.Estado}</td>
       <td>${f.Conforme || f['Condición'] || ''}</td>
@@ -112,11 +115,11 @@ function abrirRecepcion(id){
   window.open('recepcion.html?id=' + encodeURIComponent(id), '_blank');
 }
 
-document.getElementById('filtroBusqueda').addEventListener('input', () => {
-  aplicarFiltroYRender();
-});
+// Eventos de filtros
+document.getElementById('filtroFecha').addEventListener('input', aplicarFiltrosYRender);
+document.getElementById('filtroMatricula').addEventListener('input', aplicarFiltrosYRender);
 
-// Ordenamiento con flechas
+// Ordenamiento
 function ordenarTabla(dataArray, key, isPendientes=true){
   let sortObj = isPendientes ? sortPend : sortComp;
   let asc = sortObj[key] === undefined ? true : !sortObj[key];
@@ -131,35 +134,14 @@ function ordenarTabla(dataArray, key, isPendientes=true){
     return 0;
   });
 
-  // Limpiar flechas de todos los encabezados
   const ths = isPendientes ? document.querySelectorAll('#tablaPendientes th') : document.querySelectorAll('#tablaCompletados th');
-  ths.forEach(th => {
-    let span = th.querySelector('.arrow');
-    if(span) th.removeChild(span);
-  });
-
-  // Agregar flecha al th correspondiente
-  ths.forEach(th=>{
-    if(th.innerText.trim() === key){
-      let arrow = document.createElement('span');
-      arrow.className = 'arrow';
-      arrow.innerHTML = asc ? '▲' : '▼';
-      th.appendChild(arrow);
-    }
-  });
-
-  aplicarFiltroYRender();
+  ths.forEach(th => { let span = th.querySelector('.arrow'); if(span) th.removeChild(span); });
+  ths.forEach(th=>{ if(th.innerText.trim() === key){ let arrow = document.createElement('span'); arrow.className='arrow'; arrow.innerHTML=asc?'▲':'▼'; th.appendChild(arrow); } });
+  aplicarFiltrosYRender();
 }
 
-// Eventos clic encabezados
-document.querySelectorAll('#tablaPendientes th').forEach((th, idx)=>{
-  if(idx===4) return; 
-  th.addEventListener('click', ()=>ordenarTabla(dataPendientes, th.innerText.trim(), true));
-});
-document.querySelectorAll('#tablaCompletados th').forEach((th, idx)=>{
-  if(idx===5) return; 
-  th.addEventListener('click', ()=>ordenarTabla(dataCompletados, th.innerText.trim(), false));
-});
+document.querySelectorAll('#tablaPendientes th').forEach((th, idx)=>{ if(idx===4) return; th.addEventListener('click', ()=>ordenarTabla(dataPendientes, th.innerText.trim(), true)); });
+document.querySelectorAll('#tablaCompletados th').forEach((th, idx)=>{ if(idx===5) return; th.addEventListener('click', ()=>ordenarTabla(dataCompletados, th.innerText.trim(), false)); });
 
 window.onload = cargarDatos;
 </script>
