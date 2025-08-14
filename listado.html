@@ -1,259 +1,166 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Listado de Formularios - Control de Limpieza</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Limpieza de Aeronaves</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
   body {
     font-family: 'Segoe UI', sans-serif;
     background-color: #fff8d6;
     overflow-x: hidden;
-    padding: 20px;
+    min-height: 100vh;
+    position: relative;
   }
 
-  h2 { color: #333; margin-bottom: 20px; text-align: center; }
-
-  .filters {
-    margin-bottom: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-  }
-
-  .filters label {
-    font-weight: bold;
-    color: #333;
-  }
-
-  select, input[type="date"] {
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    min-width: 150px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    background-color: #fffde6;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-  }
-
-  th, td {
-    padding: 10px;
-    border: 1px solid #f0e8c2;
-    text-align: center;
-  }
-
-  th {
-    background-color: #f6b800;
-    color: white;
-    font-weight: bold;
-  }
-
-  tbody tr:nth-child(even) { background-color: #fff9d1; }
-
-  a.btn-pdf {
-    background-color: #f6b800;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: background-color 0.3s;
-  }
-  a.btn-pdf:hover { background-color: #e0a000; }
-
-  button {
-    padding: 5px 10px;
-    border-radius: 8px;
-    background-color: #f6b800;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  button:hover { background-color: #e0a000; }
-
-  /* NUBES SVG */
+  /* NUBES DETRÁS */
   .cloud {
     position: absolute;
     background: url("data:image/svg+xml;utf8,\
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'>\
-<circle cx='30' cy='30' r='20' fill='white'/><circle cx='50' cy='25' r='25' fill='white'/><circle cx='75' cy='30' r='20' fill='white'/></svg>") no-repeat center;
+<circle cx='30' cy='30' r='20' fill='white'/>\
+<circle cx='50' cy='25' r='25' fill='white'/>\
+<circle cx='75' cy='30' r='20' fill='white'/>\
+</svg>") no-repeat center;
     background-size: contain;
     width: 200px;
     height: 100px;
     opacity: 0.6;
-    z-index: 1;
+    z-index: 0;
   }
 
   @keyframes cloud-left { 0% { transform: translateX(-300px); } 100% { transform: translateX(100vw); } }
   @keyframes cloud-right { 0% { transform: translateX(100vw); } 100% { transform: translateX(-300px); } }
 
-  /* AVIONES */
-  .plane {
-    position: absolute;
-    font-size: 24px;
-    opacity: 0.85;
-    z-index: 2;
-    white-space: nowrap;
-  }
-
-  /* LIMPIADORES */
-  .cleaner {
-    position: absolute;
-    font-size: 28px;
-    opacity: 0.9;
-    z-index: 3;
-    white-space: nowrap;
+  .plane, .cleaner { 
+    position: absolute; 
+    font-size: 24px; 
+    z-index: 1; 
+    white-space: nowrap; 
     user-select: none;
   }
 
+  /* CONTENEDOR PRINCIPAL */
+  .container {
+    background-color: #fffde6;
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.15);
+    text-align: center;
+    width: 90%;
+    max-width: 520px;
+    margin: 50px auto;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* LOGO MARGEN DERECHO SUPERIOR */
+  .logo-top {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 80px;
+    max-width: 20%;
+    z-index: 11;
+  }
+
+  h1 { color: #333; margin-bottom: 30px; font-size: 24px; }
+
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    margin: 12px 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background-color: #f6b800;
+    border: none;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background-color .3s, transform .2s;
+  }
+  .btn:hover { background-color: #e0a000; transform: scale(1.02); }
+
+  /* TABLA SCROLL FIJO */
+  .table-wrapper {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 20px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+  }
+  th {
+    background-color: #f6b800;
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+
+  /* MÓVIL */
+  @media (max-width: 600px) {
+    .container { padding: 30px 15px; }
+    h1 { font-size: 20px; }
+    .btn { font-size: 16px; padding: 14px; }
+    table, th, td { font-size: 14px; }
+  }
 </style>
 </head>
 <body>
 
-<h2>Listado de Formularios</h2>
-
-<div class="filters">
-  <label>Fecha: <input type="date" id="filtroFecha"></label>
-  <label>Matrícula: 
-    <select id="filtroMatricula"><option value="">Todas</option></select>
-  </label>
-</div>
-
-<h3>Pendientes</h3>
-<table id="tablaPendientes">
-  <thead>
-    <tr>
-      <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
-<h3>Completados</h3>
-<table id="tablaCompletados">
-  <thead>
-    <tr>
-      <th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Condición</th><th>PDF</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
+<!-- NUBES SVG -->
 <script>
-const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
-let dataPendientes = [];
-let dataCompletados = [];
-
-function formatFecha(fechaStr) {
-  if(!fechaStr) return '';
-  const d = new Date(fechaStr);
-  if(isNaN(d)) return '';
-  const dd = String(d.getDate()).padStart(2,'0');
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const yyyy = d.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-}
-
-function llenarFiltroMatricula() {
-  const selectMat = document.getElementById('filtroMatricula');
-  const todasMatriculas = new Set();
-  dataPendientes.concat(dataCompletados).forEach(f => {
-    if(f.Matrícula) todasMatriculas.add(f.Matrícula);
-  });
-  selectMat.innerHTML = '<option value="">Todas</option>';
-  Array.from(todasMatriculas).sort().forEach(mat => {
-    const option = document.createElement('option');
-    option.value = mat;
-    option.textContent = mat;
-    selectMat.appendChild(option);
-  });
-}
-
-function aplicarFiltrosYRender() {
-  const filtroFecha = document.getElementById('filtroFecha').value;
-  const filtroMatricula = document.getElementById('filtroMatricula').value;
-
-  const filtrar = (f) => {
-    let coincide = true;
-    if(filtroFecha) {
-      const fForm = new Date(f.Fecha);
-      const fFiltro = new Date(filtroFecha);
-      coincide = coincide && (fForm.toDateString() === fFiltro.toDateString());
-    }
-    if(filtroMatricula) {
-      coincide = coincide && (f.Matrícula === filtroMatricula);
-    }
-    return coincide;
-  };
-
-  renderTabla(dataPendientes.filter(filtrar), 'tablaPendientes', true);
-  renderTabla(dataCompletados.filter(filtrar), 'tablaCompletados', false);
-}
-
-function renderTabla(datos, tablaId, esPendiente){
-  const tbody = document.querySelector(`#${tablaId} tbody`);
-  tbody.innerHTML = '';
-  datos.forEach((f,i)=>{
-    const fila = document.createElement('tr');
-    if(esPendiente){
-      fila.innerHTML = `<td>${i+1}</td><td>${formatFecha(f.Fecha)}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
-        <td><button onclick="abrirRecepcion('${f.ID}')">Abrir Recepción</button></td>`;
-    } else {
-      fila.innerHTML = `<td>${i+1}</td><td>${formatFecha(f.Fecha)}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
-        <td>${f.Conforme || ''}</td>
-        <td><a href="${f['PDF Generado URL']}" target="_blank" class="btn-pdf">Ver PDF</a></td>`;
-    }
-    tbody.appendChild(fila);
-  });
-}
-
-function abrirRecepcion(id){
-  window.open('recepcion.html?id=' + encodeURIComponent(id), '_blank');
-}
-
-async function cargarDatos(){
-  try {
-    let resp = await fetch(url + '?action=list');
-    let data = await resp.json();
-    dataPendientes = data.pendientes;
-    dataCompletados = data.completados;
-    llenarFiltroMatricula();
-    aplicarFiltrosYRender();
-  } catch(err){
-    alert('Error al cargar listado: ' + err.message);
+  const numClouds = 25;
+  for (let i = 0; i < numClouds; i++) {
+    const cloud = document.createElement('div');
+    cloud.classList.add('cloud');
+    const top = Math.random() * 80;
+    const isLeftToRight = Math.random() > 0.5;
+    cloud.style.top = `${top}vh`;
+    cloud.style.left = isLeftToRight ? `-300px` : `100vw`;
+    cloud.style.animation = `${isLeftToRight ? 'cloud-left' : 'cloud-right'} ${(40 + Math.random() * 60)}s linear infinite`;
+    cloud.style.transform = `scale(${0.6 + Math.random() * 1.1})`;
+    document.body.appendChild(cloud);
   }
-}
-
-document.getElementById('filtroFecha').addEventListener('change', aplicarFiltrosYRender);
-document.getElementById('filtroMatricula').addEventListener('change', aplicarFiltrosYRender);
-
-window.onload = cargarDatos;
 </script>
 
-<!-- NUBES Y AVIONES OPCIONAL -->
-<script>
-const numClouds = 15;
-for (let i=0;i<numClouds;i++){
-  const cloud = document.createElement('div');
-  cloud.classList.add('cloud');
-  const top = Math.random()*80;
-  const left = Math.random()*100;
-  cloud.style.top = `${top}vh`;
-  cloud.style.left = `${left}vw`;
-  cloud.style.animation = `cloud-left ${40 + Math.random()*60}s linear infinite`;
-  cloud.style.transform = `scale(${0.6 + Math.random()*1})`;
-  document.body.appendChild(cloud);
-}
-</script>
+<!-- UI PRINCIPAL -->
+<div class="container">
+  <img src="https://i.imgur.com/evesmtC.png" alt="Logo" class="logo-top" />
+  <h1>Control de Limpieza de Aeronaves</h1>
+  <a href="listado.html" class="btn">⏳ Listado de Formularios</a>
+  <a href="limpieza.html" class="btn">📝 Iniciar Nuevo Formulario</a>
+
+  <!-- Ejemplo tabla con scroll -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Fecha</th>
+          <th>Matrícula</th>
+          <th>Estado</th>
+          <th>Condición</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>01/08/2025</td><td>LV-BPC</td><td>Pendiente</td><td>Conforme</td></tr>
+        <tr><td>2</td><td>02/08/2025</td><td>LV-BCD</td><td>Completado</td><td>No Conforme</td></tr>
+        <tr><td>3</td><td>03/08/2025</td><td>LV-BFG</td><td>Pendiente</td><td>Conforme</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
 </body>
 </html>
