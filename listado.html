@@ -14,7 +14,7 @@
   select, input[type="date"] { padding: 8px; border-radius: 8px; border: 1px solid #ccc; min-width: 120px; width: 100%; max-width: 200px; }
 
   /* Contenedor scroll para tablas */
-  .tabla-scroll { overflow-x: auto; overflow-y: auto; display: block; margin-bottom: 30px; border-radius: 10px; width: 100%; }
+  .tabla-scroll { overflow-y: auto; overflow-x: auto; display: block; margin-bottom: 30px; border-radius: 10px; width: 100%; position: relative; z-index: 10; max-height: calc(6 * 50px + 1px); /* 6 filas aprox */ }
   .tabla-scroll table { width: 100%; border-collapse: collapse; min-width: 500px; }
   .tabla-scroll thead { position: sticky; top: 0; background-color: #f6b800; z-index: 5; }
   .tabla-scroll th, .tabla-scroll td { padding: 10px; border: 1px solid #f0e8c2; text-align: center; }
@@ -31,21 +31,31 @@
   #pdfModal { display: none; position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000; }
   #pdfModal iframe { width: 95%; height: 90%; border: none; }
 
-  /* NUBES - siempre detrás */
-  .cloud {
+  /* NUBES Y AVIONES - siempre detrás */
+  .cloud, .plane {
     position: fixed;
-    background: url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'>\
-<circle cx='30' cy='30' r='20' fill='white'/><circle cx='50' cy='25' r='25' fill='white'/><circle cx='75' cy='30' r='20' fill='white'/></svg>") no-repeat center;
-    background-size: contain;
-    width: 200px;
-    height: 100px;
-    opacity: 0.6;
     z-index: 0;
     pointer-events: none;
   }
+  .cloud { 
+    background: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'>\
+<circle cx='30' cy='30' r='20' fill='white'/><circle cx='50' cy='25' r='25' fill='white'/><circle cx='75' cy='30' r='20' fill='white'/></svg>") no-repeat center; 
+    background-size: contain;
+    width: 200px; height: 100px; opacity: 2.9;
+  }
+  .plane { 
+    background: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>\
+<polygon points='2,32 62,32 50,26 50,38' fill='#555'/></svg>") no-repeat center;
+    background-size: contain;
+    width: 60px; height: 60px; opacity: 0.8;
+  }
+
   @keyframes cloud-left { 0% { transform: translateX(-300px); } 100% { transform: translateX(100vw); } }
   @keyframes cloud-right { 0% { transform: translateX(100vw); } 100% { transform: translateX(-300px); } }
+  @keyframes plane-left { 0% { transform: translateX(-100px); } 100% { transform: translateX(110vw); } }
+  @keyframes plane-right { 0% { transform: translateX(110vw); } 100% { transform: translateX(-100px); } }
 
   /* Media Queries para móviles */
   @media (max-width: 600px) {
@@ -95,11 +105,11 @@
 </div>
 
 <script>
-// Script principal igual que el original
 const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
 let dataPendientes = [];
 let dataCompletados = [];
 
+// Formateo de fecha
 function formatFecha(fechaStr) {
   if(!fechaStr) return '';
   const d = new Date(fechaStr);
@@ -107,6 +117,7 @@ function formatFecha(fechaStr) {
   return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
 
+// Filtro de matrículas
 function llenarFiltroMatricula() {
   const selectMat = document.getElementById('filtroMatricula');
   const todasMatriculas = new Set();
@@ -120,6 +131,7 @@ function llenarFiltroMatricula() {
   });
 }
 
+// Aplicar filtros y renderizar
 function aplicarFiltrosYRender() {
   const filtroFecha = document.getElementById('filtroFecha').value;
   const filtroMatricula = document.getElementById('filtroMatricula').value;
@@ -133,6 +145,7 @@ function aplicarFiltrosYRender() {
   renderTabla(dataCompletados.filter(filtrar), 'tablaCompletados', false);
 }
 
+// Render de tablas
 function renderTabla(datos, tablaId, esPendiente){
   const tbody = document.querySelector(`#${tablaId} tbody`);
   tbody.innerHTML = '';
@@ -152,11 +165,13 @@ function renderTabla(datos, tablaId, esPendiente){
   });
 }
 
+// Abrir recepción
 function abrirRecepcion(id){
   const nuevaVentana = window.open('recepcion.html?id=' + encodeURIComponent(id), '_blank');
   if(nuevaVentana) { nuevaVentana.refrescarListado = refrescarDatos; }
 }
 
+// Cargar datos
 async function cargarDatos(){
   try {
     let resp = await fetch(url + '?action=list');
@@ -180,6 +195,7 @@ window.onload = () => {
   setInterval(refrescarDatos, 20000);
 };
 
+// Modal PDF
 function mostrarPDF(url){
   const iframe = document.getElementById('pdfFrame');
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -189,152 +205,28 @@ function mostrarPDF(url){
 }
 function cerrarModal(){ document.getElementById('pdfModal').style.display = 'none'; document.getElementById('pdfFrame').src = ''; }
 
-// Crear nubes detrás de todo
-const numClouds = 15;
+// Nubes y aviones flotando
+const numClouds = 20;
+const numPlanes = 20;
 for (let i=0;i<numClouds;i++){
   const cloud = document.createElement('div');
   cloud.classList.add('cloud');
-  cloud.style.top = `${Math.random()*80}vh`;
+  cloud.style.top = `${Math.random()*100}vh`;
   cloud.style.left = `${Math.random()*100}vw`;
-  cloud.style.animation = `cloud-left ${40 + Math.random()*60}s linear infinite`;
-  if(Math.random()>0.5) cloud.style.animation = `cloud-right ${40 + Math.random()*60}s linear infinite`;
-  cloud.style.transform = `scale(${0.6 + Math.random()*1})`;
+  const duration = 60 + Math.random()*60;
+  cloud.style.animation = Math.random()>0.5 ? `cloud-left ${duration}s linear infinite` : `cloud-right ${duration}s linear infinite`;
+  cloud.style.transform = `scale(${0.5 + Math.random()*1})`;
   document.body.appendChild(cloud);
 }
-</script>
-</body>
-</html>
-
-<h3>Pendientes</h3>
-<div class="tabla-scroll" id="scrollPendientes">
-  <table id="tablaPendientes">
-    <thead>
-      <tr><th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Acción</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<h3>Completados</h3>
-<div class="tabla-scroll" id="scrollCompletados">
-  <table id="tablaCompletados">
-    <thead>
-      <tr><th>#</th><th>Fecha</th><th>Matrícula</th><th>Estado</th><th>Condición</th><th>PDF</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<div id="pdfModal" onclick="cerrarModal()">
-  <iframe id="pdfFrame"></iframe>
-</div>
-
-<script>
-// Script igual que el original, mantiene funcionalidad
-const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
-let dataPendientes = [];
-let dataCompletados = [];
-
-function formatFecha(fechaStr) {
-  if(!fechaStr) return '';
-  const d = new Date(fechaStr);
-  if(isNaN(d)) return '';
-  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-}
-
-function llenarFiltroMatricula() {
-  const selectMat = document.getElementById('filtroMatricula');
-  const todasMatriculas = new Set();
-  dataPendientes.concat(dataCompletados).forEach(f => { if(f.Matrícula) todasMatriculas.add(f.Matrícula); });
-  selectMat.innerHTML = '<option value="">Todas</option>';
-  Array.from(todasMatriculas).sort().forEach(mat => {
-    const option = document.createElement('option');
-    option.value = mat;
-    option.textContent = mat;
-    selectMat.appendChild(option);
-  });
-}
-
-function aplicarFiltrosYRender() {
-  const filtroFecha = document.getElementById('filtroFecha').value;
-  const filtroMatricula = document.getElementById('filtroMatricula').value;
-  const filtrar = (f) => {
-    let coincide = true;
-    if(filtroFecha) { coincide = coincide && (new Date(f.Fecha).toDateString() === new Date(filtroFecha).toDateString()); }
-    if(filtroMatricula) { coincide = coincide && (f.Matrícula === filtroMatricula); }
-    return coincide;
-  };
-  renderTabla(dataPendientes.filter(filtrar), 'tablaPendientes', true);
-  renderTabla(dataCompletados.filter(filtrar), 'tablaCompletados', false);
-}
-
-function renderTabla(datos, tablaId, esPendiente){
-  const tbody = document.querySelector(`#${tablaId} tbody`);
-  tbody.innerHTML = '';
-  datos.forEach((f,i)=>{
-    const fila = document.createElement('tr');
-    if(esPendiente){
-      fila.innerHTML = `<td>${i+1}</td><td>${formatFecha(f.Fecha)}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
-        <td><button onclick="abrirRecepcion('${f.ID}')">Abrir Recepción</button></td>`;
-    } else {
-      let condicion = f["Conforme?"] || '';
-      let pdfUrl = f["PDF Generado URL"] || '';
-      fila.innerHTML = `<td>${i+1}</td><td>${formatFecha(f.Fecha)}</td><td>${f.Matrícula}</td><td>${f.Estado}</td>
-                        <td>${condicion}</td>
-                        <td>${pdfUrl ? `<button class="pdf-btn" onclick="mostrarPDF('${pdfUrl}')">Ver PDF</button>` : ''}</td>`;
-    }
-    tbody.appendChild(fila);
-  });
-}
-
-function abrirRecepcion(id){
-  const nuevaVentana = window.open('recepcion.html?id=' + encodeURIComponent(id), '_blank');
-  if(nuevaVentana) { nuevaVentana.refrescarListado = refrescarDatos; }
-}
-
-async function cargarDatos(){
-  try {
-    let resp = await fetch(url + '?action=list');
-    let data = await resp.json();
-    dataPendientes = data.pendientes;
-    dataCompletados = data.completados;
-    llenarFiltroMatricula();
-    aplicarFiltrosYRender();
-  } catch(err){
-    console.error('Error al cargar listado:', err);
-  }
-}
-
-async function refrescarDatos() { await cargarDatos(); }
-
-document.getElementById('filtroFecha').addEventListener('change', aplicarFiltrosYRender);
-document.getElementById('filtroMatricula').addEventListener('change', aplicarFiltrosYRender);
-
-window.onload = () => {
-  cargarDatos();
-  setInterval(refrescarDatos, 20000);
-};
-
-function mostrarPDF(url){
-  const iframe = document.getElementById('pdfFrame');
-  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if(match){ iframe.src = `https://drive.google.com/file/d/${match[1]}/preview`; } 
-  else { iframe.src = url; }
-  document.getElementById('pdfModal').style.display = 'flex';
-}
-function cerrarModal(){ document.getElementById('pdfModal').style.display = 'none'; document.getElementById('pdfFrame').src = ''; }
-
-// NUBES
-const numClouds = 15;
-for (let i=0;i<numClouds;i++){
-  const cloud = document.createElement('div');
-  cloud.classList.add('cloud');
-  cloud.style.top = `${Math.random()*80}vh`;
-  cloud.style.left = `${Math.random()*100}vw`;
-  cloud.style.animation = `cloud-left ${40 + Math.random()*60}s linear infinite`;
-  if(Math.random()>0.5) cloud.style.animation = `cloud-right ${40 + Math.random()*60}s linear infinite`;
-  cloud.style.transform = `scale(${0.6 + Math.random()*1})`;
-  document.body.appendChild(cloud);
+for (let i=0;i<numPlanes;i++){
+  const plane = document.createElement('div');
+  plane.classList.add('plane');
+  plane.style.top = `${10 + Math.random()*60}vh`;
+  plane.style.left = `${Math.random()*100}vw`;
+  const duration = 20 + Math.random()*20;
+  plane.style.animation = Math.random()>0.5 ? `plane-left ${duration}s linear infinite` : `plane-right ${duration}s linear infinite`;
+  plane.style.transform = `scale(${0.5 + Math.random()*0.8})`;
+  document.body.appendChild(plane);
 }
 </script>
 </body>
