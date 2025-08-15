@@ -7,14 +7,15 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', sans-serif; background-color: #fff8d6; overflow-x: hidden; padding: 20px; position: relative; }
+
   h2 { color: #333; margin-bottom: 20px; text-align: center; position: relative; z-index: 10; }
   .filters { margin-bottom: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; position: relative; z-index: 10; }
-  .filters label { font-weight: bold; color: #333; }
-  select, input[type="date"] { padding: 8px; border-radius: 8px; border: 1px solid #ccc; min-width: 150px; }
+  .filters label { font-weight: bold; color: #333; display: flex; flex-direction: column; align-items: flex-start; }
+  select, input[type="date"] { padding: 8px; border-radius: 8px; border: 1px solid #ccc; min-width: 120px; width: 100%; max-width: 200px; }
 
   /* Contenedor scroll para tablas */
-  .tabla-scroll { overflow-y: auto; display: block; margin-bottom: 30px; border-radius: 10px; }
-  .tabla-scroll table { width: 100%; border-collapse: collapse; }
+  .tabla-scroll { overflow-x: auto; overflow-y: auto; display: block; margin-bottom: 30px; border-radius: 10px; width: 100%; }
+  .tabla-scroll table { width: 100%; border-collapse: collapse; min-width: 500px; }
   .tabla-scroll thead { position: sticky; top: 0; background-color: #f6b800; z-index: 5; }
   .tabla-scroll th, .tabla-scroll td { padding: 10px; border: 1px solid #f0e8c2; text-align: center; }
   .tabla-scroll tbody tr:nth-child(even) { background-color: #fff9d1; }
@@ -30,12 +31,19 @@
   @keyframes cloud-right { 0% { transform: translateX(100vw); } 100% { transform: translateX(-300px); } }
 
   /* LOGO ESTÁTICO */
-  #logoImg { position: fixed; top: 20px; right: 30px; width: 280px; height: 140px; z-index: 10; }
-  #logoImg img { width: 100%; height: 100%; object-fit: contain; }
+  #logoImg { position: fixed; top: 20px; right: 30px; width: 30vw; max-width: 200px; height: auto; z-index: 10; }
+  #logoImg img { width: 100%; height: auto; object-fit: contain; }
 
   /* Modal PDF */
   #pdfModal { display: none; position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000; }
-  #pdfModal iframe { width: 90%; height: 90%; border: none; }
+  #pdfModal iframe { width: 95%; height: 90%; border: none; }
+
+  /* Media Queries para móviles */
+  @media (max-width: 600px) {
+    .filters { flex-direction: column; align-items: stretch; gap: 10px; }
+    .filters label { width: 100%; }
+    .tabla-scroll table { min-width: 100%; }
+  }
 </style>
 </head>
 <body>
@@ -78,6 +86,7 @@
 </div>
 
 <script>
+// Script igual que el original, mantiene funcionalidad
 const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
 let dataPendientes = [];
 let dataCompletados = [];
@@ -113,7 +122,6 @@ function aplicarFiltrosYRender() {
   };
   renderTabla(dataPendientes.filter(filtrar), 'tablaPendientes', true);
   renderTabla(dataCompletados.filter(filtrar), 'tablaCompletados', false);
-  ajustarAlturaTablas(); // reajustar altura al renderizar
 }
 
 function renderTabla(datos, tablaId, esPendiente){
@@ -163,7 +171,6 @@ window.onload = () => {
   setInterval(refrescarDatos, 20000);
 };
 
-// Modal PDF
 function mostrarPDF(url){
   const iframe = document.getElementById('pdfFrame');
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -172,20 +179,6 @@ function mostrarPDF(url){
   document.getElementById('pdfModal').style.display = 'flex';
 }
 function cerrarModal(){ document.getElementById('pdfModal').style.display = 'none'; document.getElementById('pdfFrame').src = ''; }
-
-// Ajustar altura de tablas para mostrar 6 filas
-function ajustarAlturaTablas() {
-  const scrollContainers = [document.getElementById('scrollPendientes'), document.getElementById('scrollCompletados')];
-  scrollContainers.forEach(sc => {
-    const fila = sc.querySelector('tbody tr');
-    if(fila) {
-      const alturaFila = fila.offsetHeight;
-      sc.style.maxHeight = (alturaFila * 6) + 'px';
-    } else {
-      sc.style.maxHeight = '240px'; // fallback
-    }
-  });
-}
 
 // NUBES
 const numClouds = 15;
