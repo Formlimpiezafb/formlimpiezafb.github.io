@@ -1,223 +1,121 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Recepción de Limpieza</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; }
-    label { display: block; margin-top: 15px; }
-    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
-    canvas { border: 1px solid #000; margin-top: 5px; }
-    button { margin-top: 15px; padding: 10px 20px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Formulario Recepción</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; background-color: #fff8d6; padding: 20px; }
+  label { display: block; margin-top: 15px; }
+  input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+  canvas { border: 1px solid #ccc; margin-top: 5px; }
+  button { margin-top: 20px; padding: 10px 20px; border-radius: 8px; background-color:#f6b800; color:white; border:none; cursor:pointer; }
+  button:hover { background-color: #e0a000; }
+  input[readonly], textarea[readonly], select[disabled] { background: #eee; pointer-events: none; }
+
+  /* Modal PDF */
+  #pdfModal { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:1000; }
+  #pdfModal iframe { width:90%; height:90%; border:none; }
+</style>
 </head>
 <body>
-  <h2>Formulario de Recepción de Limpieza</h2>
+<h2>Formulario Recepción</h2>
 
-  <form id="formRecepcion" style="display:none;">
-    <!-- Campo oculto para el ID -->
-    <input type="hidden" id="formIdHidden" name="id">
+<form id="formRecepcion" style="display:none;" enctype="multipart/form-data">
+  <fieldset disabled>
+    <label>Fecha limpieza:<input type="date" id="fecha" readonly /></label>
+    <label>Matrícula:<input type="text" id="matricula" readonly /></label>
+    <label>Posición:<input type="text" id="posicion" readonly /></label>
+    <label>Hora Inicio:<input type="time" id="horaInicio" readonly /></label>
+    <label>Hora Fin:<input type="time" id="horaFin" readonly /></label>
+    <label>Tipo de Limpieza:<input type="text" id="tipoLimpieza" readonly /></label>
+    <label>Responsable limpieza:<input type="text" id="responsable" readonly /></label>
+    <label>Observaciones limpieza:<textarea id="observaciones" rows="3" readonly></textarea></label>
+  </fieldset>
 
-    <h3>Datos de Limpieza (solo lectura)</h3>
-    <label>Fecha:
-      <input type="date" id="fecha" readonly>
-    </label>
-    <label>Matrícula:
-      <input type="text" id="matricula" readonly>
-    </label>
-    <label>Posición:
-      <input type="text" id="posicion" readonly>
-    </label>
-    <label>Hora Inicio:
-      <input type="time" id="horaInicio" readonly>
-    </label>
-    <label>Hora Fin:
-      <input type="time" id="horaFin" readonly>
-    </label>
-    <label>Tipo Limpieza:
-      <input type="text" id="tipoLimpieza" readonly>
-    </label>
-    <label>Responsable:
-      <input type="text" id="responsable" readonly>
-    </label>
-    <label>Observaciones:
-      <textarea id="observaciones" readonly></textarea>
-    </label>
+  <label>Fecha recepción:<input type="date" name="fechaRecepcion" id="fechaRecepcion" required /></label>
+  <label>Hora recepción:<input type="time" name="horaRecepcion" id="horaRecepcion" required /></label>
+  <label>¿Está conforme la limpieza?
+    <select name="conforme" id="conforme" required>
+      <option value="">Seleccione</option>
+      <option value="Conforme">Conforme</option>
+      <option value="No Conforme">No Conforme</option>
+    </select>
+  </label>
+  <label>Observaciones recepción:<textarea name="observacionesRecep" id="observacionesRecep" rows="3"></textarea></label>
 
-    <h3>Datos de Recepción</h3>
-    <label>Fecha Recepción:
-      <input type="date" id="fechaRecep" required>
-    </label>
-    <label>Hora Recepción:
-      <input type="time" id="horaRecep" required>
-    </label>
-    <label>Responsable Recepción:
-      <input type="text" id="responsableRecep" required>
-    </label>
-    <label>Estado:
-      <select id="conforme" required>
-        <option value="">Seleccione</option>
-        <option value="Conforme">Conforme</option>
-        <option value="No Conforme">No Conforme</option>
-      </select>
-    </label>
-    <label>Observaciones Recepción:
-      <textarea id="obsRecep"></textarea>
-    </label>
+  <label>Firma (tocar o click y dibujar):</label>
+  <canvas id="canvasFirma" width="400" height="150"></canvas>
+  <button type="button" id="clearFirma">Limpiar Firma</button>
 
-    <label>Firma Recepción:</label>
-    <canvas id="firmaRecep" width="400" height="200"></canvas>
-    <button type="button" onclick="limpiarFirma()">Limpiar Firma</button>
-    <input type="hidden" id="firmaRecepData" name="firmaRecepData">
+  <label>Adjuntar archivos:<input type="file" name="files" multiple /></label>
 
-    <label>Adjuntar archivos:
-      <input type="file" id="archivosRecep" name="archivosRecep" multiple>
-    </label>
+  <input type="hidden" name="id" id="formIdHidden" />
+  <input type="hidden" name="formType" value="recepcion" />
 
-    <button type="submit">Enviar Recepción</button>
-  </form>
+  <button type="submit">Enviar Recepción</button>
+</form>
 
-  <script>
-    const url = 'TU_URL_DEL_SCRIPT_WEBAPP';
+<!-- Modal PDF -->
+<div id="pdfModal" onclick="cerrarModal()">
+  <iframe id="pdfFrame"></iframe>
+</div>
 
-    // ======== CARGAR FORMULARIO POR ID ========
-    async function cargarFormularioPorId(id){
-      try {
-        let resp = await fetch(url + '?action=list');
-        let data = await resp.json();
-        let todos = data.pendientes.concat(data.completados);
-        let formData = todos.find(f => f.ID == id);
-        if(!formData){ alert('No se encontró formulario con ese ID'); return; }
+<script>
+const url = 'TU_URL_DEL_APPS_SCRIPT_AQUI';
 
-        document.getElementById('formRecepcion').style.display = 'block';
-        document.getElementById('formIdHidden').value = id;
-
-        // Campos solo lectura
-        document.getElementById('fecha').value = formData["Fecha"] || '';
-        document.getElementById('horaInicio').value = formData["Hora Inicio"] || '';
-        document.getElementById('horaFin').value = formData["Hora Fin"] || '';
-        document.getElementById('matricula').value = formData["Matrícula"] || '';
-        document.getElementById('posicion').value = formData["Posición"] || '';
-        document.getElementById('tipoLimpieza').value = formData["Tipo Limpieza"] || '';
-        document.getElementById('responsable').value = formData["Responsable"] || '';
-        document.getElementById('observaciones').value = formData["Observaciones"] || '';
-
-      } catch(err){ alert('Error al cargar datos: '+err.message); }
-    }
-
-    // ======== FIRMA RECEPCIÓN ========
-    const canvas = document.getElementById('firmaRecep');
-    const ctx = canvas.getContext('2d');
-    let dibujando = false;
-
-    canvas.addEventListener('mousedown', e => { dibujando = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-    canvas.addEventListener('mousemove', e => { if(dibujando){ ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
-    canvas.addEventListener('mouseup', () => dibujando = false);
-    canvas.addEventListener('mouseleave', () => dibujando = false);
-
-    function limpiarFirma(){ ctx.clearRect(0,0,canvas.width,canvas.height); }
-
-    // ======== ENVIAR RECEPCIÓN ========
-    document.getElementById('formRecepcion').addEventListener('submit', async function(e){
-      e.preventDefault();
-
-      document.getElementById('firmaRecepData').value = canvas.toDataURL();
-
-      const formData = new FormData();
-      formData.append("action","recepcion");
-      formData.append("id", document.getElementById('formIdHidden').value);
-      formData.append("fechaRecep", document.getElementById('fechaRecep').value);
-      formData.append("horaRecep", document.getElementById('horaRecep').value);
-      formData.append("responsableRecep", document.getElementById('responsableRecep').value);
-      formData.append("conforme", document.getElementById('conforme').value);
-      formData.append("obsRecep", document.getElementById('obsRecep').value);
-      formData.append("firmaRecep", document.getElementById('firmaRecepData').value);
-
-      const archivos = document.getElementById('archivosRecep').files;
-      for(let i=0;i<archivos.length;i++){
-        formData.append("file"+i, archivos[i]);
-      }
-
-      try {
-        let resp = await fetch(url, { method: "POST", body: formData });
-        let data = await resp.json();
-        if(data.status === "ok"){
-          alert("Recepción registrada correctamente");
-          location.reload();
-        } else {
-          alert("Error: " + data.message);
-        }
-      } catch(err){
-        alert("Error al enviar recepción: " + err.message);
-      }
-    });
-
-    // ======== AUTOCARGA POR URL ?id= ========
-    window.onload = () => {
-      const params = new URLSearchParams(window.location.search);
-      if(params.has('id')) cargarFormularioPorId(params.get('id'));
-      else alert('No se recibió ID para cargar formulario');
-    };
-  </script>
-</body>
-</html>
-const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
-
+// Canvas firma
 const canvas = document.getElementById('canvasFirma');
 const ctx = canvas.getContext('2d');
 let drawing = false;
 
-// Funciones para formatear fecha y hora
-function formatFechaInput(f){
-  if(!f) return '';
-  if(f.includes('/')){ // caso: 18/08/2025
-    let [d,m,y] = f.split('/');
-    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-  }
-  if(f.includes('-')) return f; // caso ya correcto
-  return '';
-}
-function formatHoraInput(h){
-  if(!h) return '';
-  return h.split(':').slice(0,2).join(':'); // 14:30:00 -> 14:30
-}
-
-// --- Firma ---
 canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-canvas.addEventListener('mouseup', () => { drawing = false; });
+canvas.addEventListener('mouseup', e => { drawing = false; });
+canvas.addEventListener('mouseout', e => { drawing = false; });
 canvas.addEventListener('mousemove', e => { if(drawing){ ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }});
 canvas.addEventListener('touchstart', e => { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; ctx.beginPath(); ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top); drawing = true; });
-canvas.addEventListener('touchend', () => { drawing = false; });
+canvas.addEventListener('touchend', e => { e.preventDefault(); drawing = false; });
 canvas.addEventListener('touchmove', e => { e.preventDefault(); if(!drawing) return; const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top); ctx.stroke(); });
-document.getElementById('clearFirma').onclick = () => ctx.clearRect(0,0,canvas.width,canvas.height);
+document.getElementById('clearFirma').onclick = () => { ctx.clearRect(0,0,canvas.width,canvas.height); }
 
-// --- Cargar datos del formulario ---
+// --- Cargar formulario por ID ---
 async function cargarFormularioPorId(id){
-  try{
-    let resp = await fetch(url + '?action=list');
-    let data = await resp.json();
-    let pendientes = data.pendientes.concat(data.completados);
-    let f = pendientes.find(r => r.ID === id);
-    if(!f){ alert('No se encontró el formulario con ese ID'); return; }
-
+  try {
+    const resp = await fetch(url + '?action=list');
+    const data = await resp.json();
+    const pendientes = data.pendientes.concat(data.completados);
+    const formData = pendientes.find(f => f.ID === id);
+    if(!formData){ alert('No se encontró formulario con ese ID'); return; }
     document.getElementById('formRecepcion').style.display = 'block';
     document.getElementById('formIdHidden').value = id;
 
-    document.getElementById('fecha').value = formatFechaInput(f["Fecha"]);
-    document.getElementById('horaInicio').value = formatHoraInput(f["Hora Inicio"]);
-    document.getElementById('horaFin').value = formatHoraInput(f["Hora Fin"]);
-    document.getElementById('matricula').value = f["Matrícula"];
-    document.getElementById('posicion').value = f["Posición"];
-    document.getElementById('tipoLimpieza').value = f["Tipo Limpieza"];
-    document.getElementById('responsable').value = f["Responsable"];
-    document.getElementById('observaciones').value = f["Observaciones"];
-  }catch(err){ alert('Error cargando datos: ' + err.message); }
+    // Funciones para formatear
+    const formatFechaInput = s => {
+      if(!s) return '';
+      if(s.includes('/')){
+        const [dd, mm, yyyy] = s.split('/');
+        return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+      } else if(s.includes('-')) return s;
+      return '';
+    }
+    const formatHoraInput = s => s && s.length>=5 ? s.slice(0,5) : '';
+
+    // Llenar campos de limpieza
+    document.getElementById('fecha').value = formatFechaInput(formData.Fecha);
+    document.getElementById('horaInicio').value = formatHoraInput(formData['Hora Inicio']);
+    document.getElementById('horaFin').value = formatHoraInput(formData['Hora Fin']);
+    document.getElementById('matricula').value = formData['Matrícula'];
+    document.getElementById('posicion').value = formData.Posición;
+    document.getElementById('tipoLimpieza').value = formData['Tipo Limpieza'];
+    document.getElementById('responsable').value = formData.Responsable;
+    document.getElementById('observaciones').value = formData.Observaciones;
+  } catch(err){ alert('Error al cargar datos: '+err.message); }
 }
 
 window.onload = () => {
   const params = new URLSearchParams(window.location.search);
   if(params.has('id')) cargarFormularioPorId(params.get('id'));
-  else alert('No se recibió ID');
+  else alert('No se recibió ID para cargar formulario');
 };
 
 // --- Modal PDF ---
@@ -232,25 +130,26 @@ function cerrarModal(){
   document.getElementById('pdfFrame').src = '';
 }
 
-// --- Enviar recepción ---
+// --- Envío del formulario ---
 document.getElementById('formRecepcion').onsubmit = async (e) => {
   e.preventDefault();
-  const blank = document.createElement('canvas'); blank.width = canvas.width; blank.height = canvas.height;
-  if(canvas.toDataURL() === blank.toDataURL()){ alert('Firme antes de enviar'); return; }
+  const blank = document.createElement('canvas');
+  blank.width = canvas.width; blank.height = canvas.height;
+  if(canvas.toDataURL() === blank.toDataURL()){ alert('Por favor, firme antes de enviar'); return; }
 
   const formData = new FormData(e.target);
   formData.append('firma', canvas.toDataURL());
 
-  try{
-    let resp = await fetch(url, {method:'POST', body: formData});
-    let data = await resp.json();
+  try {
+    const resp = await fetch(url, {method:'POST', body: formData});
+    const data = await resp.json();
     if(data.status === 'ok'){
       mostrarPDF(data.pdfUrl);
       e.target.reset();
       ctx.clearRect(0,0,canvas.width,canvas.height);
       document.getElementById('formRecepcion').style.display = 'none';
-    }else alert('Error: ' + data.message);
-  }catch(err){ alert('Error al enviar: ' + err.message); }
+    } else alert('Error: ' + data.message);
+  } catch(err){ alert('Error al enviar: '+err.message); }
 };
 </script>
 </body>
