@@ -42,7 +42,7 @@
       <option value="No Conforme">No Conforme</option>
     </select>
   </label>
-  <label>Observaciones recepción:<textarea name="observacionesRecep" id="observacionesRecep" rows="3"></textarea></label>
+  <label>Observaciones recepción:<textarea name="obsRecep" id="obsRecep" rows="3"></textarea></label>
 
   <label>Firma (tocar o click y dibujar):</label>
   <canvas id="canvasFirma" width="400" height="150"></canvas>
@@ -68,93 +68,76 @@ const canvas = document.getElementById('canvasFirma');
 const ctx = canvas.getContext('2d');
 let drawing = false;
 
-// --- Manejo firma ---
+// --- Firma ---
 canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-canvas.addEventListener('mouseup', e => { drawing = false; });
-canvas.addEventListener('mouseout', e => { drawing = false; });
+canvas.addEventListener('mouseup', () => drawing = false);
+canvas.addEventListener('mouseout', () => drawing = false);
 canvas.addEventListener('mousemove', e => { if(drawing){ ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }});
-canvas.addEventListener('touchstart', e => { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; ctx.beginPath(); ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top); drawing = true; });
+canvas.addEventListener('touchstart', e => { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const t = e.touches[0]; ctx.beginPath(); ctx.moveTo(t.clientX-rect.left,t.clientY-rect.top); drawing = true; });
 canvas.addEventListener('touchend', e => { e.preventDefault(); drawing = false; });
-canvas.addEventListener('touchmove', e => { e.preventDefault(); if(!drawing) return; const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top); ctx.stroke(); });
-document.getElementById('clearFirma').onclick = () => { ctx.clearRect(0,0,canvas.width,canvas.height); }
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if(!drawing) return; const rect = canvas.getBoundingClientRect(); const t = e.touches[0]; ctx.lineTo(t.clientX-rect.left,t.clientY-rect.top); ctx.stroke(); });
+document.getElementById('clearFirma').onclick = () => ctx.clearRect(0,0,canvas.width,canvas.height);
 
-// --- Formateadores ---
-function formatFechaInput(fechaStr) {
-  if(!fechaStr) return '';
-  if(fechaStr.includes('/')) {
-    const partes = fechaStr.split('/');
-    return `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}`;
-  } else if(fechaStr.includes('-')) return fechaStr;
-  return '';
+// --- Helpers ---
+function formatFechaInput(f){
+  if(!f) return '';
+  if(f.includes('/')){ let [d,m,y]=f.split('/'); return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`; }
+  return f;
 }
-function formatHoraInput(horaStr){ if(!horaStr) return ''; return horaStr.slice(0,5); }
+function formatHoraInput(h){ if(!h) return ''; return h.slice(0,5); }
 
-// --- Cargar formulario por ID ---
+// --- Cargar formulario ---
 async function cargarFormularioPorId(id){
   try {
-    let resp = await fetch(url + '?action=list');
+    let resp = await fetch(url+'?action=list');
     let data = await resp.json();
-    let pendientes = data.pendientes.concat(data.completados);
-    let formData = pendientes.find(f => f.ID === id);
+    let all = data.pendientes.concat(data.completados);
+    let f = all.find(r => r.ID === id);
 
-    console.log("Datos recibidos:", formData); // <-- debug
-
-    if(!formData){ alert('No se encontró formulario con ese ID'); return; }
+    if(!f){ alert("Formulario no encontrado"); return; }
     document.getElementById('formRecepcion').style.display = 'block';
     document.getElementById('formIdHidden').value = id;
 
-    document.getElementById('fecha').value = formatFechaInput(formData["Fecha"]);
-    document.getElementById('horaInicio').value = formatHoraInput(formData["Hora Inicio"]);
-    document.getElementById('horaFin').value = formatHoraInput(formData["Hora Fin"]);
-    document.getElementById('matricula').value = formData["Matrícula"];
-    document.getElementById('posicion').value = formData["Posición"];
-    document.getElementById('tipoLimpieza').value = formData["Tipo de Limpieza"];
-    document.getElementById('responsable').value = formData["Responsable"];
-    document.getElementById('observaciones').value = formData["Observaciones"];
-  } catch(err){ alert('Error al cargar datos: '+err.message); }
+    document.getElementById('fecha').value = formatFechaInput(f["Fecha"]);
+    document.getElementById('matricula').value = f["Matrícula"];
+    document.getElementById('posicion').value = f["Posición"];
+    document.getElementById('horaInicio').value = formatHoraInput(f["Hora Inicio"]);
+    document.getElementById('horaFin').value = formatHoraInput(f["Hora Fin"]);
+    document.getElementById('tipoLimpieza').value = f["Tipo Limpieza"];
+    document.getElementById('responsable').value = f["Responsable"];
+    document.getElementById('observaciones').value = f["Observaciones"];
+  } catch(e){ alert("Error cargando datos: "+e.message); }
 }
 
 window.onload = () => {
   const params = new URLSearchParams(window.location.search);
   if(params.has('id')) cargarFormularioPorId(params.get('id'));
-  else alert('No se recibió ID para cargar formulario');
 };
 
 // --- Modal PDF ---
 function mostrarPDF(url){
   const iframe = document.getElementById('pdfFrame');
-  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if(match) iframe.src = `https://drive.google.com/file/d/${match[1]}/preview`;
-  else iframe.src = url;
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  iframe.src = m ? `https://drive.google.com/file/d/${m[1]}/preview` : url;
   document.getElementById('pdfModal').style.display = 'flex';
 }
-function cerrarModal(){
-  document.getElementById('pdfModal').style.display = 'none';
-  document.getElementById('pdfFrame').src = '';
-}
+function cerrarModal(){ document.getElementById('pdfModal').style.display = 'none'; document.getElementById('pdfFrame').src = ''; }
 
-// --- Envío del formulario ---
+// --- Envío ---
 document.getElementById('formRecepcion').onsubmit = async (e) => {
   e.preventDefault();
-  const blank = document.createElement('canvas');
-  blank.width = canvas.width; blank.height = canvas.height;
-  if(canvas.toDataURL() === blank.toDataURL()){ alert('Por favor, firme antes de enviar'); return; }
+  const blank = document.createElement('canvas'); blank.width=canvas.width; blank.height=canvas.height;
+  if(canvas.toDataURL()===blank.toDataURL()){ alert("Firme antes de enviar"); return; }
 
-  const formData = new FormData(e.target);
-  formData.append('firma', canvas.toDataURL());
+  const fd = new FormData(e.target);
+  fd.append("firma", canvas.toDataURL());
 
   try {
-    const resp = await fetch(url, {method:'POST', body: formData});
-    const data = await resp.json();
-    if(data.status === 'ok'){
-      mostrarPDF(data.pdfUrl);
-      e.target.reset();
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      document.getElementById('formRecepcion').style.display = 'none';
-    } else {
-      alert('Error: ' + data.message);
-    }
-  } catch(err){ alert('Error al enviar: '+err.message); }
+    let r = await fetch(url,{method:"POST",body:fd});
+    let d = await r.json();
+    if(d.status==="ok"){ mostrarPDF(d.pdfUrl); e.target.reset(); ctx.clearRect(0,0,canvas.width,canvas.height); document.getElementById('formRecepcion').style.display='none'; }
+    else alert("Error: "+d.message);
+  } catch(err){ alert("Error: "+err.message); }
 };
 </script>
 </body>
