@@ -1,65 +1,166 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Formulario Recepción</title>
-<style>
-  body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; background-color: #fff8d6; padding: 20px; }
-  label { display: block; margin-top: 15px; }
-  input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
-  canvas { border: 1px solid #ccc; margin-top: 5px; }
-  button { margin-top: 20px; padding: 10px 20px; border-radius: 8px; background-color:#f6b800; color:white; border:none; cursor:pointer; }
-  button:hover { background-color: #e0a000; }
-  input[readonly], textarea[readonly], select[disabled] { background: #eee; pointer-events: none; }
-
-  #pdfModal { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:1000; }
-  #pdfModal iframe { width:90%; height:90%; border:none; }
-</style>
+  <meta charset="UTF-8">
+  <title>Recepción de Limpieza</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+    label { display: block; margin-top: 15px; }
+    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+    canvas { border: 1px solid #000; margin-top: 5px; }
+    button { margin-top: 15px; padding: 10px 20px; }
+  </style>
 </head>
 <body>
-<h2>Formulario Recepción</h2>
+  <h2>Formulario de Recepción de Limpieza</h2>
 
-<form id="formRecepcion" style="display:none;" enctype="multipart/form-data">
-  <fieldset disabled>
-    <label>Fecha limpieza:<input type="date" id="fecha" name="fecha" readonly /></label>
-    <label>Matrícula:<input type="text" id="matricula" name="matricula" readonly /></label>
-    <label>Posición:<input type="text" id="posicion" name="posicion" readonly /></label>
-    <label>Hora Inicio:<input type="time" id="horaInicio" name="horaInicio" readonly /></label>
-    <label>Hora Fin:<input type="time" id="horaFin" name="horaFin" readonly /></label>
-    <label>Tipo de Limpieza:<input type="text" id="tipoLimpieza" name="tipoLimpieza" readonly /></label>
-    <label>Responsable limpieza:<input type="text" id="responsable" name="responsable" readonly /></label>
-    <label>Observaciones limpieza:<textarea id="observaciones" name="observaciones" rows="3" readonly></textarea></label>
-  </fieldset>
+  <form id="formRecepcion" style="display:none;">
+    <!-- Campo oculto para el ID -->
+    <input type="hidden" id="formIdHidden" name="id">
 
-  <label>Fecha recepción:<input type="date" name="fechaRecepcion" id="fechaRecepcion" required /></label>
-  <label>Hora recepción:<input type="time" name="horaRecepcion" id="horaRecepcion" required /></label>
-  <label>¿Está conforme la limpieza?
-    <select name="conforme" id="conforme" required>
-      <option value="">Seleccione</option>
-      <option value="Conforme">Conforme</option>
-      <option value="No Conforme">No Conforme</option>
-    </select>
-  </label>
-  <label>Observaciones recepción:<textarea name="observacionesRecep" id="observacionesRecep" rows="3"></textarea></label>
+    <h3>Datos de Limpieza (solo lectura)</h3>
+    <label>Fecha:
+      <input type="date" id="fecha" readonly>
+    </label>
+    <label>Matrícula:
+      <input type="text" id="matricula" readonly>
+    </label>
+    <label>Posición:
+      <input type="text" id="posicion" readonly>
+    </label>
+    <label>Hora Inicio:
+      <input type="time" id="horaInicio" readonly>
+    </label>
+    <label>Hora Fin:
+      <input type="time" id="horaFin" readonly>
+    </label>
+    <label>Tipo Limpieza:
+      <input type="text" id="tipoLimpieza" readonly>
+    </label>
+    <label>Responsable:
+      <input type="text" id="responsable" readonly>
+    </label>
+    <label>Observaciones:
+      <textarea id="observaciones" readonly></textarea>
+    </label>
 
-  <label>Firma (tocar o click y dibujar):</label>
-  <canvas id="canvasFirma" width="400" height="150"></canvas>
-  <button type="button" id="clearFirma">Limpiar Firma</button>
+    <h3>Datos de Recepción</h3>
+    <label>Fecha Recepción:
+      <input type="date" id="fechaRecep" required>
+    </label>
+    <label>Hora Recepción:
+      <input type="time" id="horaRecep" required>
+    </label>
+    <label>Responsable Recepción:
+      <input type="text" id="responsableRecep" required>
+    </label>
+    <label>Estado:
+      <select id="conforme" required>
+        <option value="">Seleccione</option>
+        <option value="Conforme">Conforme</option>
+        <option value="No Conforme">No Conforme</option>
+      </select>
+    </label>
+    <label>Observaciones Recepción:
+      <textarea id="obsRecep"></textarea>
+    </label>
 
-  <label>Adjuntar archivos:<input type="file" name="files" multiple /></label>
+    <label>Firma Recepción:</label>
+    <canvas id="firmaRecep" width="400" height="200"></canvas>
+    <button type="button" onclick="limpiarFirma()">Limpiar Firma</button>
+    <input type="hidden" id="firmaRecepData" name="firmaRecepData">
 
-  <input type="hidden" name="id" id="formIdHidden" />
-  <input type="hidden" name="formType" value="recepcion" />
+    <label>Adjuntar archivos:
+      <input type="file" id="archivosRecep" name="archivosRecep" multiple>
+    </label>
 
-  <button type="submit">Enviar Recepción</button>
-</form>
+    <button type="submit">Enviar Recepción</button>
+  </form>
 
-<div id="pdfModal" onclick="cerrarModal()">
-  <iframe id="pdfFrame"></iframe>
-</div>
+  <script>
+    const url = 'TU_URL_DEL_SCRIPT_WEBAPP';
 
-<script>
+    // ======== CARGAR FORMULARIO POR ID ========
+    async function cargarFormularioPorId(id){
+      try {
+        let resp = await fetch(url + '?action=list');
+        let data = await resp.json();
+        let todos = data.pendientes.concat(data.completados);
+        let formData = todos.find(f => f.ID == id);
+        if(!formData){ alert('No se encontró formulario con ese ID'); return; }
+
+        document.getElementById('formRecepcion').style.display = 'block';
+        document.getElementById('formIdHidden').value = id;
+
+        // Campos solo lectura
+        document.getElementById('fecha').value = formData["Fecha"] || '';
+        document.getElementById('horaInicio').value = formData["Hora Inicio"] || '';
+        document.getElementById('horaFin').value = formData["Hora Fin"] || '';
+        document.getElementById('matricula').value = formData["Matrícula"] || '';
+        document.getElementById('posicion').value = formData["Posición"] || '';
+        document.getElementById('tipoLimpieza').value = formData["Tipo Limpieza"] || '';
+        document.getElementById('responsable').value = formData["Responsable"] || '';
+        document.getElementById('observaciones').value = formData["Observaciones"] || '';
+
+      } catch(err){ alert('Error al cargar datos: '+err.message); }
+    }
+
+    // ======== FIRMA RECEPCIÓN ========
+    const canvas = document.getElementById('firmaRecep');
+    const ctx = canvas.getContext('2d');
+    let dibujando = false;
+
+    canvas.addEventListener('mousedown', e => { dibujando = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+    canvas.addEventListener('mousemove', e => { if(dibujando){ ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
+    canvas.addEventListener('mouseup', () => dibujando = false);
+    canvas.addEventListener('mouseleave', () => dibujando = false);
+
+    function limpiarFirma(){ ctx.clearRect(0,0,canvas.width,canvas.height); }
+
+    // ======== ENVIAR RECEPCIÓN ========
+    document.getElementById('formRecepcion').addEventListener('submit', async function(e){
+      e.preventDefault();
+
+      document.getElementById('firmaRecepData').value = canvas.toDataURL();
+
+      const formData = new FormData();
+      formData.append("action","recepcion");
+      formData.append("id", document.getElementById('formIdHidden').value);
+      formData.append("fechaRecep", document.getElementById('fechaRecep').value);
+      formData.append("horaRecep", document.getElementById('horaRecep').value);
+      formData.append("responsableRecep", document.getElementById('responsableRecep').value);
+      formData.append("conforme", document.getElementById('conforme').value);
+      formData.append("obsRecep", document.getElementById('obsRecep').value);
+      formData.append("firmaRecep", document.getElementById('firmaRecepData').value);
+
+      const archivos = document.getElementById('archivosRecep').files;
+      for(let i=0;i<archivos.length;i++){
+        formData.append("file"+i, archivos[i]);
+      }
+
+      try {
+        let resp = await fetch(url, { method: "POST", body: formData });
+        let data = await resp.json();
+        if(data.status === "ok"){
+          alert("Recepción registrada correctamente");
+          location.reload();
+        } else {
+          alert("Error: " + data.message);
+        }
+      } catch(err){
+        alert("Error al enviar recepción: " + err.message);
+      }
+    });
+
+    // ======== AUTOCARGA POR URL ?id= ========
+    window.onload = () => {
+      const params = new URLSearchParams(window.location.search);
+      if(params.has('id')) cargarFormularioPorId(params.get('id'));
+      else alert('No se recibió ID para cargar formulario');
+    };
+  </script>
+</body>
+</html>
 const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
 
 const canvas = document.getElementById('canvasFirma');
