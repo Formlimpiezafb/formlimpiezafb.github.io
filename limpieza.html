@@ -5,134 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Formulario de Limpieza</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', sans-serif; background-color: #fff8d6; padding: 20px; position: relative; overflow-x: hidden; }
-  h2 { color: #333; margin-bottom: 20px; text-align: center; position: relative; z-index: 10; }
-
-  form {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    max-width: 600px;
-    width: 95%; /* Responsive */
-    margin: auto;
-    position: relative;
-    z-index: 10;
-  }
-
-  label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
-  input, select, textarea {
-    width: 100%; 
-    padding: 8px; 
-    margin-top: 5px;
-    border-radius: 8px; 
-    border: 1px solid #ccc; 
-    font-size: 14px;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-    transition: border-color 0.3s, box-shadow 0.3s;
-  }
-  input:focus, select:focus, textarea:focus {
-    border-color: #f6b800;
-    box-shadow: 0 0 6px rgba(246, 184, 0, 0.5);
-    outline: none;
-  }
-  textarea { resize: vertical; }
-
-  canvas {
-    width: 100%; /* Responsive */
-    height: auto; /* altura será calculada dinámicamente */
-    border: 2px solid #ccc;
-    margin-top: 5px;
-    border-radius: 8px;
-    background-color: white;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-    transition: border-color 0.3s, box-shadow 0.3s;
-  }
-  canvas:hover {
-    border-color: #f6b800;
-    box-shadow: 0 0 6px rgba(246, 184, 0, 0.5);
-  }
-
-  button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    background-color: #f6b800;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.1s;
-    font-weight: bold;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-  }
-  button:hover {
-    background-color: #e0a000;
-    transform: translateY(-1px);
-  }
-  button:active {
-    transform: translateY(1px);
-  }
-
-  /* Logo fijo */
-  #logoImg {
-    position: fixed;
-    top: 20px;
-    right: 30px;
-    width: 40vw;   /* Responsive */
-    max-width: 200px;
-    height: auto;
-    z-index: 10;
-  }
-  #logoImg img {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-  }
-
-  /* Nubes */
-  .cloud {
-    position: absolute;
-    background: url("data:image/svg+xml;utf8,\
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',sans-serif; background-color:#fff8d6; padding:20px; position:relative; overflow-x:hidden; }
+  h2 { color:#333; margin-bottom:20px; text-align:center; position:relative; z-index:10; }
+  form { background:white; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); max-width:600px; width:95%; margin:auto; position:relative; z-index:10; }
+  label { display:block; margin-top:15px; font-weight:bold; color:#333; }
+  input, select, textarea { width:100%; padding:8px; margin-top:5px; border-radius:8px; border:1px solid #ccc; font-size:14px; }
+  textarea { resize:vertical; }
+  canvas { width:100%; height:auto; border:2px solid #ccc; margin-top:5px; border-radius:8px; background:white; }
+  button { margin-top:15px; padding:10px 20px; background:#f6b800; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
+  #logoImg { position:fixed; top:20px; right:30px; width:40vw; max-width:200px; height:auto; z-index:10; }
+  #logoImg img { width:100%; height:auto; object-fit:contain; }
+  .cloud { position:absolute; background:url("data:image/svg+xml;utf8,\
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'>\
-<circle cx='30' cy='30' r='20' fill='white'/><circle cx='50' cy='25' r='25' fill='white'/><circle cx='75' cy='30' r='20' fill='white'/></svg>") no-repeat center;
-    background-size: contain;
-    width: 200px; height: 100px; opacity: 0.6; z-index: 1;
-  }
-  @keyframes cloud-left { 0% { transform: translateX(-300px); } 100% { transform: translateX(100vw); } }
-  @keyframes cloud-right { 0% { transform: translateX(100vw); } 100% { transform: translateX(-300px); } }
-
-  /* Media queries para móviles pequeños */
-  @media (max-width: 400px) {
-    button { font-size: 14px; padding: 8px 16px; }
-    input, select, textarea { font-size: 13px; padding: 6px; }
-  }
+<circle cx='30' cy='30' r='20' fill='white'/><circle cx='50' cy='25' r='25' fill='white'/><circle cx='75' cy='30' r='20' fill='white'/></svg>") no-repeat center; background-size:contain; width:200px;height:100px;opacity:0.6; z-index:1; }
 </style>
 </head>
 <body>
 
-<div id="logoImg">
-  <img src="https://i.imgur.com/evesmtC.png" alt="Logo">
-</div>
-
+<div id="logoImg"><img src="https://i.imgur.com/evesmtC.png" alt="Logo"></div>
 <h2>Formulario de Limpieza</h2>
 
 <form id="formLimpieza" enctype="multipart/form-data">
-  <label>Fecha:
-    <input type="text" name="fecha" id="fecha" required readonly />
-  </label>
-  <label>Matrícula:
-    <input type="text" name="matricula" required />
-  </label>
-  <label>Posición:
-    <input type="text" name="posicion" required />
-  </label>
-  <label>Hora Inicio:
-    <input type="time" name="horaInicio" required />
-  </label>
-  <label>Hora Fin:
-    <input type="time" name="horaFin" required />
-  </label>
+  <label>Fecha: <input type="text" name="fecha" id="fecha" required readonly></label>
+  <label>Matrícula: <input type="text" name="matricula" required></label>
+  <label>Posición: <input type="text" name="posicion" required></label>
+  <label>Hora Inicio: <input type="time" name="horaInicio" required></label>
+  <label>Hora Fin: <input type="time" name="horaFin" required></label>
   <label>Tipo de Limpieza:
     <select name="tipoLimpieza" required>
       <option value="">Seleccione</option>
@@ -141,120 +40,66 @@
       <option value="Profunda Plus">Profunda Plus</option>
     </select>
   </label>
-  <label>Responsable limpieza:
-    <input type="text" name="responsable" required />
-  </label>
-  <label>Firma (tocar o click y dibujar):</label>
+  <label>Responsable limpieza: <input type="text" name="responsable" required></label>
+  <label>Firma:</label>
   <canvas id="canvasFirma"></canvas>
   <button type="button" id="clearFirma">Limpiar Firma</button>
-
-  <label>Observaciones:
-    <textarea name="observaciones" rows="3"></textarea>
-  </label>
-  <label>Adjuntar archivos:
-    <input type="file" name="files" multiple />
-  </label>
-
+  <label>Observaciones: <textarea name="observaciones" rows="3"></textarea></label>
+  <label>Adjuntar archivos: <input type="file" name="files" multiple></label>
+  <input type="hidden" name="formType" value="limpieza">
   <button type="submit">Enviar Limpieza</button>
 </form>
 
 <script>
+// Canvas firma
 const canvas = document.getElementById('canvasFirma');
 const ctx = canvas.getContext('2d');
 let drawing = false;
+const CANVAS_WIDTH = 400, CANVAS_HEIGHT = 150;
 
-// Tamaño original del canvas
-const CANVAS_WIDTH = 400;
-const CANVAS_HEIGHT = 150;
-
-// Ajustar canvas al ancho del form manteniendo proporción
 function resizeCanvas() {
-  const formWidth = canvas.parentElement.offsetWidth;
-  canvas.width = formWidth;
-  canvas.height = formWidth * (CANVAS_HEIGHT / CANVAS_WIDTH);
+  const w = canvas.parentElement.offsetWidth;
+  canvas.width = w;
+  canvas.height = w * (CANVAS_HEIGHT / CANVAS_WIDTH);
 }
 window.addEventListener('resize', resizeCanvas);
-window.addEventListener('load', resizeCanvas);
+window.addEventListener('load', () => { resizeCanvas(); setFechaHoy(); });
 
-// Obtener posición de puntero
-function getPointerPos(e) {
-  const rect = canvas.getBoundingClientRect();
-  let x, y;
-  if(e.touches){
-    x = e.touches[0].clientX - rect.left;
-    y = e.touches[0].clientY - rect.top;
-  } else {
-    x = e.offsetX;
-    y = e.offsetY;
-  }
-  return {x, y};
-}
-
-// Eventos de dibujo
-canvas.addEventListener('mousedown', e => { drawing=true; const pos=getPointerPos(e); ctx.beginPath(); ctx.moveTo(pos.x,pos.y); });
-canvas.addEventListener('mouseup', e => drawing=false);
-canvas.addEventListener('mouseout', e => drawing=false);
-canvas.addEventListener('mousemove', e => { if(drawing){ const pos=getPointerPos(e); ctx.lineTo(pos.x,pos.y); ctx.stroke(); } });
-
-canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; const pos=getPointerPos(e); ctx.beginPath(); ctx.moveTo(pos.x,pos.y); });
-canvas.addEventListener('touchend', e => { e.preventDefault(); drawing=false; });
-canvas.addEventListener('touchmove', e => { e.preventDefault(); if(!drawing) return; const pos=getPointerPos(e); ctx.lineTo(pos.x,pos.y); ctx.stroke(); });
-
-// Limpiar firma
-document.getElementById('clearFirma').onclick = () => ctx.clearRect(0,0,canvas.width,canvas.height);
+function getPointerPos(e) { const rect=canvas.getBoundingClientRect(); return e.touches ? {x:e.touches[0].clientX-rect.left, y:e.touches[0].clientY-rect.top} : {x:e.offsetX, y:e.offsetY}; }
+canvas.addEventListener('mousedown', e=>{drawing=true; const pos=getPointerPos(e); ctx.beginPath(); ctx.moveTo(pos.x,pos.y);});
+canvas.addEventListener('mouseup', ()=>drawing=false);
+canvas.addEventListener('mouseout', ()=>drawing=false);
+canvas.addEventListener('mousemove', e=>{if(drawing){const pos=getPointerPos(e);ctx.lineTo(pos.x,pos.y);ctx.stroke();}});
+canvas.addEventListener('touchstart', e=>{e.preventDefault(); drawing=true; const pos=getPointerPos(e); ctx.beginPath(); ctx.moveTo(pos.x,pos.y);});
+canvas.addEventListener('touchend', e=>{e.preventDefault();drawing=false;});
+canvas.addEventListener('touchmove', e=>{e.preventDefault(); if(!drawing) return; const pos=getPointerPos(e);ctx.lineTo(pos.x,pos.y);ctx.stroke();});
+document.getElementById('clearFirma').onclick=()=>ctx.clearRect(0,0,canvas.width,canvas.height);
 
 // Fecha actual
-function setFechaHoy() {
-  const hoy = new Date();
-  const dd = ('0' + hoy.getDate()).slice(-2);
-  const mm = ('0' + (hoy.getMonth()+1)).slice(-2);
-  const yyyy = hoy.getFullYear();
-  document.getElementById('fecha').value = `${dd}/${mm}/${yyyy}`;
-}
+function setFechaHoy(){const hoy=new Date(); document.getElementById('fecha').value=`${('0'+hoy.getDate()).slice(-2)}/${('0'+(hoy.getMonth()+1)).slice(-2)}/${hoy.getFullYear()}`;}
 
-// Envío del formulario
-document.getElementById('formLimpieza').onsubmit = async e => {
+// Envío
+document.getElementById('formLimpieza').onsubmit=async e=>{
   e.preventDefault();
-  const blank = document.createElement('canvas');
-  blank.width=canvas.width; blank.height=canvas.height;
-  if(canvas.toDataURL()===blank.toDataURL()){ alert('Por favor, firme antes de enviar'); return; }
-
-  const formData = new FormData(e.target);
-  formData.append('firma', canvas.toDataURL());
-  formData.append('formType', 'limpieza');
-
-  const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
-
+  const blank=document.createElement('canvas'); blank.width=canvas.width; blank.height=canvas.height;
+  if(canvas.toDataURL()===blank.toDataURL()){alert('Por favor, firme antes de enviar'); return;}
+  const formData=new FormData(e.target);
+  formData.append('firma',canvas.toDataURL());
+  const url='TU_URL_APPS_SCRIPT';
   try{
-    const resp = await fetch(url,{method:'POST',body:formData});
-    const data = await resp.json();
-    if(data.status==='ok'){
-      alert('Formulario enviado correctamente! ID: '+data.id);
-      e.target.reset();
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      setFechaHoy();
-    } else {
-      alert('Error: '+data.message);
-    }
-  }catch(err){
-    alert('Error al enviar: '+err.message);
-  }
+    const resp=await fetch(url,{method:'POST',body:formData});
+    const data=await resp.json();
+    if(data.status==='ok'){alert('Formulario enviado! ID: '+data.id); e.target.reset(); ctx.clearRect(0,0,canvas.width,canvas.height); setFechaHoy();}
+    else{alert('Error: '+data.message);}
+  }catch(err){alert('Error al enviar: '+err.message);}
 };
 
 // Nubes decorativas
-const numClouds = 15;
-for (let i=0;i<numClouds;i++){
-  const cloud = document.createElement('div');
-  cloud.classList.add('cloud');
-  cloud.style.top = `${Math.random()*80}vh`;
-  cloud.style.left = `${Math.random()*100}vw`;
-  cloud.style.animation = `cloud-left ${40 + Math.random()*60}s linear infinite`;
-  if(Math.random()>0.5) cloud.style.animation = `cloud-right ${40 + Math.random()*60}s linear infinite`;
-  cloud.style.transform = `scale(${0.6 + Math.random()*1})`;
+for(let i=0;i<20;i++){
+  const cloud=document.createElement('div'); cloud.classList.add('cloud');
+  cloud.style.top=`${Math.random()*80}vh`; cloud.style.left=`${Math.random()*100}vw`;
   document.body.appendChild(cloud);
 }
-
-window.onload = setFechaHoy;
 </script>
 </body>
 </html>
