@@ -3,124 +3,177 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Formulario de Recepción</title>
+<title>Recepción de Limpieza</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Segoe UI',sans-serif; background-color:#fff8d6; padding:20px; position:relative; overflow-x:hidden; }
-  h2 { color:#333; margin-bottom:20px; text-align:center; position:relative; z-index:10; }
-  form { background:white; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); max-width:600px; width:95%; margin:auto; position:relative; z-index:10; }
+  body { font-family:'Segoe UI', sans-serif; background-color:#fff8d6; padding:20px; }
+  h2 { text-align:center; color:#333; margin-bottom:20px; }
+  form { background:white; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); max-width:600px; width:95%; margin:auto; }
   label { display:block; margin-top:15px; font-weight:bold; color:#333; }
   input, select, textarea { width:100%; padding:8px; margin-top:5px; border-radius:8px; border:1px solid #ccc; font-size:14px; }
-  input[readonly], select[disabled], textarea[readonly] { background:#eee; color:#555; }
-  textarea { resize:vertical; }
+  input[readonly], select[disabled], textarea[readonly] { background:#eee; }
+  button { margin-top:15px; padding:10px 20px; background-color:#f6b800; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
+  button:hover { background-color:#e0a000; }
   canvas { width:100%; height:auto; border:2px solid #ccc; margin-top:5px; border-radius:8px; background:white; }
-  button { margin-top:15px; padding:10px 20px; background:#f6b800; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
-  #logoImg { position:fixed; top:20px; right:30px; width:40vw; max-width:200px; height:auto; z-index:10; }
-  #logoImg img { width:100%; height:auto; object-fit:contain; }
-  .cloud { position:absolute; background:url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'>\
-<circle cx='30' cy='30' r='20' fill='white'/><circle cx='50' cy='25' r='25' fill='white'/><circle cx='75' cy='30' r='20' fill='white'/></svg>") no-repeat center; background-size:contain; width:200px;height:100px;opacity:0.6; z-index:1; }
 </style>
 </head>
 <body>
 
-<div id="logoImg"><img src="https://i.imgur.com/evesmtC.png" alt="Logo"></div>
-<h2>Formulario de Recepción</h2>
+<h2>Recepción de Limpieza</h2>
 
 <form id="formRecepcion" enctype="multipart/form-data">
-  <label>Fecha: <input type="text" name="fecha" id="fecha" readonly></label>
-  <label>Matrícula: <input type="text" name="matricula" id="matricula" readonly></label>
-  <label>Posición: <input type="text" name="posicion" id="posicion" readonly></label>
-  <label>Hora Inicio: <input type="time" name="horaInicio" id="horaInicio" readonly></label>
-  <label>Hora Fin: <input type="time" name="horaFin" id="horaFin" readonly></label>
-  <label>Tipo de Limpieza: <input type="text" name="tipoLimpieza" id="tipoLimpieza" readonly></label>
-  <label>Responsable limpieza: <input type="text" name="responsable" id="responsable" readonly></label>
-  <label>Observaciones Limpieza: <textarea id="observaciones" readonly></textarea></label>
 
-  <hr style="margin:20px 0; border:1px solid #ccc;">
+  <!-- DATOS DE LIMPIEZA (solo lectura) -->
+  <label>Fecha limpieza:</label>
+  <input type="text" id="fecha" readonly>
 
-  <label>Fecha Recepción: <input type="text" name="fechaRecepcion" id="fechaRecepcion" readonly></label>
-  <label>Hora Recepción: <input type="time" name="horaRecepcion" required></label>
-  <label>Conforme: 
-    <select name="conforme" required>
-      <option value="">Seleccione</option>
-      <option value="Sí">Sí</option>
-      <option value="No">No</option>
-    </select>
-  </label>
-  <label>Observaciones Recepción: <textarea name="observacionesRecep" rows="3"></textarea></label>
-  <label>Firma Recepción:</label>
+  <label>Matrícula:</label>
+  <input type="text" id="matricula" readonly>
+
+  <label>Posición:</label>
+  <input type="text" id="posicion" readonly>
+
+  <label>Hora inicio:</label>
+  <input type="time" id="horaInicio" readonly>
+
+  <label>Hora fin:</label>
+  <input type="time" id="horaFin" readonly>
+
+  <label>Tipo de limpieza:</label>
+  <select id="tipoLimpieza" disabled>
+    <option value="">Seleccione</option>
+    <option value="Superficial">Superficial</option>
+    <option value="Profunda">Profunda</option>
+    <option value="Profunda Plus">Profunda Plus</option>
+  </select>
+
+  <label>Responsable limpieza:</label>
+  <input type="text" id="responsable" readonly>
+
+  <label>Observaciones limpieza:</label>
+  <textarea id="observaciones" rows="3" readonly></textarea>
+
+  <hr>
+
+  <!-- DATOS DE RECEPCIÓN -->
+  <label>Fecha recepción:</label>
+  <input type="text" id="fechaRecepcion" readonly>
+
+  <label>Hora recepción:</label>
+  <input type="time" id="horaRecepcion" required>
+
+  <label>Conforme:</label>
+  <select id="conforme" required>
+    <option value="">Seleccione</option>
+    <option value="Sí">Sí</option>
+    <option value="No">No</option>
+  </select>
+
+  <label>Observaciones recepción:</label>
+  <textarea id="observacionesRecep" name="observacionesRecep" rows="3"></textarea>
+
+  <label>Adjuntar archivos:</label>
+  <input type="file" id="filesRecep" name="files" multiple>
+
+  <label>Firma recepción:</label>
   <canvas id="canvasFirmaRecep"></canvas>
   <button type="button" id="clearFirmaRecep">Limpiar Firma</button>
-  <label>Adjuntar archivos: <input type="file" name="files" multiple></label>
-  <input type="hidden" name="formType" value="recepcion">
-  <input type="hidden" name="id" id="formId" value="">
+
+  <input type="hidden" id="formId" name="id">
+
   <button type="submit">Enviar Recepción</button>
 </form>
 
 <script>
-// Cargar datos de limpieza
+const canvas = document.getElementById('canvasFirmaRecep');
+const ctx = canvas.getContext('2d');
+let drawing=false;
+const CANVAS_WIDTH=400;
+const CANVAS_HEIGHT=150;
+
+// Ajustar canvas
+function resizeCanvas(){ 
+  const formWidth = canvas.parentElement.offsetWidth;
+  canvas.width=formWidth;
+  canvas.height=formWidth*(CANVAS_HEIGHT/CANVAS_WIDTH);
+}
+window.addEventListener('load', resizeCanvas);
+window.addEventListener('resize', resizeCanvas);
+
+// Posición del puntero
+function getPointerPos(e){
+  const rect = canvas.getBoundingClientRect();
+  let x,y;
+  if(e.touches){ x=e.touches[0].clientX-rect.left; y=e.touches[0].clientY-rect.top; }
+  else { x=e.offsetX; y=e.offsetY; }
+  return {x,y};
+}
+
+// Eventos de dibujo
+canvas.addEventListener('mousedown', e=>{ drawing=true; const p=getPointerPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+canvas.addEventListener('mouseup', e=>drawing=false);
+canvas.addEventListener('mouseout', e=>drawing=false);
+canvas.addEventListener('mousemove', e=>{ if(drawing){ const p=getPointerPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); } });
+canvas.addEventListener('touchstart', e=>{ e.preventDefault(); drawing=true; const p=getPointerPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+canvas.addEventListener('touchend', e=>{ e.preventDefault(); drawing=false; });
+canvas.addEventListener('touchmove', e=>{ e.preventDefault(); if(!drawing) return; const p=getPointerPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); });
+
+// Limpiar firma
+document.getElementById('clearFirmaRecep').onclick = ()=>ctx.clearRect(0,0,canvas.width,canvas.height);
+
+const urlApp = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
+
+// Obtener ID desde URL y cargar datos
+const urlParams = new URLSearchParams(window.location.search);
+const formId = urlParams.get('id');
+if(formId) cargarDatos(formId);
+
 async function cargarDatos(id){
-  const resp = await fetch('https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec?id='+id);
+  const resp = await fetch(urlApp+'?action=get&id='+id);
   const data = await resp.json();
   if(data.status==='ok'){
     const f = data.form;
-    document.getElementById('fecha').value = f[0];
-    document.getElementById('matricula').value = f[1];
-    document.getElementById('posicion').value = f[2];
-    document.getElementById('horaInicio').value = f[3];
-    document.getElementById('horaFin').value = f[4];
-    document.getElementById('tipoLimpieza').value = f[5];
-    document.getElementById('responsable').value = f[6];
-    document.getElementById('observaciones').value = f[8];
-    document.getElementById('formId').value = id;
+    document.getElementById('fecha').value=f[1];
+    document.getElementById('matricula').value=f[2];
+    document.getElementById('posicion').value=f[3];
+    document.getElementById('horaInicio').value=f[4];
+    document.getElementById('horaFin').value=f[5];
+    document.getElementById('tipoLimpieza').value=f[6];
+    document.getElementById('responsable').value=f[7];
+    document.getElementById('observaciones').value=f[9];
+    document.getElementById('formId').value=id;
+    
     const hoy = new Date();
     document.getElementById('fechaRecepcion').value = `${('0'+hoy.getDate()).slice(-2)}/${('0'+(hoy.getMonth()+1)).slice(-2)}/${hoy.getFullYear()}`;
+  } else {
+    alert('No se pudo cargar el formulario: '+data.message);
   }
 }
 
-// Canvas firma
-const canvasR = document.getElementById('canvasFirmaRecep');
-const ctxR = canvasR.getContext('2d');
-let drawingR=false;
-const CANVAS_WIDTH=400,CANVAS_HEIGHT=150;
-function resizeCanvasR(){const w=canvasR.parentElement.offsetWidth;canvasR.width=w;canvasR.height=w*(CANVAS_HEIGHT/CANVAS_WIDTH);}
-window.addEventListener('resize',resizeCanvasR);
-window.addEventListener('load',()=>{resizeCanvasR(); cargarDatos(getIdFromUrl());});
-
-// Dibujo firma
-function getPointerPosR(e){const rect=canvasR.getBoundingClientRect(); return e.touches?{x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top}:{x:e.offsetX,y:e.offsetY};}
-canvasR.addEventListener('mousedown',e=>{drawingR=true; const pos=getPointerPosR(e); ctxR.beginPath();ctxR.moveTo(pos.x,pos.y);});
-canvasR.addEventListener('mouseup',()=>drawingR=false);
-canvasR.addEventListener('mouseout',()=>drawingR=false);
-canvasR.addEventListener('mousemove',e=>{if(drawingR){const pos=getPointerPosR(e);ctxR.lineTo(pos.x,pos.y);ctxR.stroke();}});
-canvasR.addEventListener('touchstart',e=>{e.preventDefault(); drawingR=true; const pos=getPointerPosR(e);ctxR.beginPath();ctxR.moveTo(pos.x,pos.y);});
-canvasR.addEventListener('touchend',e=>{e.preventDefault(); drawingR=false;});
-canvasR.addEventListener('touchmove',e=>{e.preventDefault(); if(!drawingR) return; const pos=getPointerPosR(e);ctxR.lineTo(pos.x,pos.y);ctxR.stroke();});
-document.getElementById('clearFirmaRecep').onclick=()=>ctxR.clearRect(0,0,canvasR.width,canvasR.height);
-
-// Envío recepción
-document.getElementById('formRecepcion').onsubmit=async e=>{
+// Envío del formulario
+document.getElementById('formRecepcion').onsubmit = async e=>{
   e.preventDefault();
-  const blank=document.createElement('canvas'); blank.width=canvasR.width; blank.height=canvasR.height;
-  if(canvasR.toDataURL()===blank.toDataURL()){alert('Por favor, firme antes de enviar'); return;}
-  const formData=new FormData(e.target);
-  formData.append('firma',canvasR.toDataURL());
-  const url='https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
+  const blank = document.createElement('canvas'); blank.width=canvas.width; blank.height=canvas.height;
+  if(canvas.toDataURL()===blank.toDataURL()){ alert('Por favor, firme antes de enviar'); return; }
+
+  const formData = new FormData(e.target);
+  formData.append('firma', canvas.toDataURL());
+  formData.append('formType','recepcion');
+
   try{
-    const resp=await fetch(url,{method:'POST',body:formData});
-    const data=await resp.json();
-    if(data.status==='ok'){alert('Recepción enviada!'); e.target.reset(); ctxR.clearRect(0,0,canvasR.width,canvasR.height);}
-    else{alert('Error: '+data.message);}
-  }catch(err){alert('Error al enviar: '+err.message);}
+    const resp = await fetch(urlApp,{method:'POST',body:formData});
+    const data = await resp.json();
+    if(data.status==='ok'){
+      alert('Recepción enviada correctamente!');
+      e.target.reset();
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+    } else {
+      alert('Error: '+data.message);
+    }
+  }catch(err){
+    alert('Error al enviar: '+err.message);
+  }
 };
-
-// Obtener ID del URL
-function getIdFromUrl(){ const params=new URLSearchParams(window.location.search); return params.get('id'); }
-
-// Nubes decorativas
-for(let i=0;i<20;i++){const cloud=document.createElement('div'); cloud.classList.add('cloud'); cloud.style.top=`${Math.random()*80}vh`; cloud.style.left=`${Math.random()*100}vw`; document.body.appendChild(cloud);}
 </script>
-
 </body>
 </html>
