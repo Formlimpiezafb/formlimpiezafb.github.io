@@ -3,118 +3,94 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Formulario Recepción</title>
+<title>Formulario de Recepción</title>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; background-color: #fff8d6; padding: 20px; }
-  label { display: block; margin-top: 15px; }
-  input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
-  canvas { border: 1px solid #ccc; margin-top: 5px; }
-  button { margin-top: 20px; padding: 10px 20px; border-radius: 8px; background-color:#f6b800; color:white; border:none; cursor:pointer; }
-  button:hover { background-color: #e0a000; }
-  input[readonly], textarea[readonly], select[disabled] { background: #eee; pointer-events: none; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',sans-serif; background-color:#fff8d6; padding:20px; position:relative; overflow-x:hidden; }
+  h2 { color:#333; margin-bottom:20px; text-align:center; position:relative; z-index:10; }
+  form { background:white; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); max-width:600px; width:95%; margin:auto; position:relative; z-index:10; }
+  label { display:block; margin-top:15px; font-weight:bold; color:#333; }
+  input, select, textarea { width:100%; padding:8px; margin-top:5px; border-radius:8px; border:1px solid #ccc; font-size:14px; }
+  textarea { resize:vertical; }
+  canvas { width:100%; height:auto; border:2px solid #ccc; margin-top:5px; border-radius:8px; background:white; }
+  button { margin-top:15px; padding:10px 20px; background:#f6b800; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
+  #logoImg { position:fixed; top:20px; right:30px; width:40vw; max-width:200px; height:auto; z-index:10; }
+  #logoImg img { width:100%; height:auto; object-fit:contain; }
+  .cloud { position:absolute; background:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'>\
+<circle cx='30' cy='30' r='20' fill='white'/><circle cx='50' cy='25' r='25' fill='white'/><circle cx='75' cy='30' r='20' fill='white'/></svg>") no-repeat center; background-size:contain; width:200px;height:100px;opacity:0.6; z-index:1; }
 </style>
 </head>
 <body>
-<h2>Formulario Recepción</h2>
 
-<form id="formRecepcion" style="display:none;" enctype="multipart/form-data">
-  <fieldset disabled>
-    <label>Fecha limpieza:<input type="date" name="fecha" id="fecha" readonly /></label>
-    <label>Matrícula:<input type="text" name="matricula" id="matricula" readonly /></label>
-    <label>Posición:<input type="text" name="posicion" id="posicion" readonly /></label>
-    <label>Hora Inicio:<input type="time" name="horaInicio" id="horaInicio" readonly /></label>
-    <label>Hora Fin:<input type="time" name="horaFin" id="horaFin" readonly /></label>
-    <label>Tipo de Limpieza:<input type="text" name="tipoLimpieza" id="tipoLimpieza" readonly /></label>
-    <label>Responsable limpieza:<input type="text" name="responsable" id="responsable" readonly /></label>
-    <label>Observaciones limpieza:<textarea name="observaciones" id="observaciones" rows="3" readonly></textarea></label>
-  </fieldset>
+<div id="logoImg"><img src="https://i.imgur.com/evesmtC.png" alt="Logo"></div>
+<h2>Formulario de Recepción</h2>
 
-  <label>Fecha recepción:<input type="date" name="fechaRecepcion" id="fechaRecepcion" required /></label>
-  <label>Hora recepción:<input type="time" name="horaRecepcion" id="horaRecepcion" required /></label>
-  <label>¿Está conforme la limpieza?
-    <select name="conforme" id="conforme" required>
+<form id="formRecepcion" enctype="multipart/form-data">
+  <label>Fecha Recepción: <input type="text" name="fechaRecepcion" id="fechaRecepcion" required readonly></label>
+  <label>Hora Recepción: <input type="time" name="horaRecepcion" required></label>
+  <label>Conforme: 
+    <select name="conforme" required>
       <option value="">Seleccione</option>
-      <option value="Conforme">Conforme</option>
-      <option value="No Conforme">No Conforme</option>
+      <option value="Sí">Sí</option>
+      <option value="No">No</option>
     </select>
   </label>
-  <label>Observaciones recepción:<textarea name="observacionesRecep" id="observacionesRecep" rows="3"></textarea></label>
-
-  <label>Firma (tocar o click y dibujar):</label>
-  <canvas id="canvasFirma" width="400" height="150"></canvas>
-  <button type="button" id="clearFirma">Limpiar Firma</button>
-
-  <label>Adjuntar archivos:<input type="file" name="files" multiple /></label>
-
-  <input type="hidden" name="id" id="formIdHidden" />
-  <input type="hidden" name="formType" value="recepcion" />
-
+  <label>Observaciones Recepción: <textarea name="observacionesRecep" rows="3"></textarea></label>
+  <label>Firma Recepción:</label>
+  <canvas id="canvasFirmaRecep"></canvas>
+  <button type="button" id="clearFirmaRecep">Limpiar Firma</button>
+  <label>Adjuntar archivos: <input type="file" name="files" multiple></label>
+  <input type="hidden" name="formType" value="recepcion">
+  <input type="hidden" name="id" id="formId" value="">
   <button type="submit">Enviar Recepción</button>
 </form>
 
 <script>
-const url = 'TU_URL_EXEC_DEL_APPS_SCRIPT'; // reemplaza por tu URL de ejecución
+// Canvas firma
+const canvasR = document.getElementById('canvasFirmaRecep');
+const ctxR = canvasR.getContext('2d');
+let drawingR=false;
+const CANVAS_WIDTH=400,CANVAS_HEIGHT=150;
+function resizeCanvasR(){const w=canvasR.parentElement.offsetWidth;canvasR.width=w;canvasR.height=w*(CANVAS_HEIGHT/CANVAS_WIDTH);}
+window.addEventListener('resize',resizeCanvasR);
+window.addEventListener('load',()=>{resizeCanvasR(); setFechaHoyRecep();});
 
-const canvas = document.getElementById('canvasFirma');
-const ctx = canvas.getContext('2d');
-let drawing = false;
+// Dibujo
+function getPointerPosR(e){const rect=canvasR.getBoundingClientRect(); return e.touches?{x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top}:{x:e.offsetX,y:e.offsetY};}
+canvasR.addEventListener('mousedown',e=>{drawingR=true; const pos=getPointerPosR(e); ctxR.beginPath();ctxR.moveTo(pos.x,pos.y);});
+canvasR.addEventListener('mouseup',()=>drawingR=false);
+canvasR.addEventListener('mouseout',()=>drawingR=false);
+canvasR.addEventListener('mousemove',e=>{if(drawingR){const pos=getPointerPosR(e);ctxR.lineTo(pos.x,pos.y);ctxR.stroke();}});
+canvasR.addEventListener('touchstart',e=>{e.preventDefault(); drawingR=true; const pos=getPointerPosR(e);ctxR.beginPath();ctxR.moveTo(pos.x,pos.y);});
+canvasR.addEventListener('touchend',e=>{e.preventDefault(); drawingR=false;});
+canvasR.addEventListener('touchmove',e=>{e.preventDefault(); if(!drawingR) return; const pos=getPointerPosR(e);ctxR.lineTo(pos.x,pos.y);ctxR.stroke();});
+document.getElementById('clearFirmaRecep').onclick=()=>ctxR.clearRect(0,0,canvasR.width,canvasR.height);
 
-canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-canvas.addEventListener('mouseup', e => { drawing = false; });
-canvas.addEventListener('mouseout', e => { drawing = false; });
-canvas.addEventListener('mousemove', e => { if(drawing){ ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }});
-canvas.addEventListener('touchstart', e => { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; ctx.beginPath(); ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top); drawing = true; });
-canvas.addEventListener('touchend', e => { e.preventDefault(); drawing = false; });
-canvas.addEventListener('touchmove', e => { e.preventDefault(); if(!drawing) return; const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top); ctx.stroke(); });
-document.getElementById('clearFirma').onclick = () => { ctx.clearRect(0,0,canvas.width,canvas.height); }
+// Fecha actual
+function setFechaHoyRecep(){const hoy=new Date(); document.getElementById('fechaRecepcion').value=`${('0'+hoy.getDate()).slice(-2)}/${('0'+(hoy.getMonth()+1)).slice(-2)}/${hoy.getFullYear()}`;}
 
-// --- Cargar formulario por ID ---
-async function cargarFormularioPorId(id){
-  try{
-    let resp = await fetch(url+'?action=list');
-    let data = await resp.json();
-    let formData = data.pendientes.find(f => f.ID === id) || data.completados.find(f=>f.ID===id);
-    if(!formData){ alert('No se encontró formulario con ese ID'); return; }
-
-    document.getElementById('formRecepcion').style.display = 'block';
-    document.getElementById('formIdHidden').value = id;
-
-    const formatFechaInput = s => s ? s.split('/').reverse().join('-') : '';
-    const formatHoraInput = h => h? h.slice(0,5) : '';
-
-    document.getElementById('fecha').value = formatFechaInput(formData.Fecha);
-    document.getElementById('horaInicio').value = formatHoraInput(formData['Hora Inicio']);
-    document.getElementById('horaFin').value = formatHoraInput(formData['Hora Fin']);
-    document.getElementById('matricula').value = formData.Matrícula;
-    document.getElementById('posicion').value = formData.Posición;
-    document.getElementById('tipoLimpieza').value = formData['Tipo Limpieza'];
-    document.getElementById('responsable').value = formData.Responsable;
-    document.getElementById('observaciones').value = formData.Observaciones;
-  }catch(err){ alert('Error al cargar datos: '+err.message); }
-}
-
-window.onload = () => {
-  const params = new URLSearchParams(window.location.search);
-  if(params.has('id')) cargarFormularioPorId(params.get('id'));
-  else alert('No se recibió ID para cargar formulario');
-}
-
-// --- Envío del formulario ---
-document.getElementById('formRecepcion').onsubmit = async (e)=>{
+// Envío
+document.getElementById('formRecepcion').onsubmit=async e=>{
   e.preventDefault();
-  const blank = document.createElement('canvas');
-  blank.width=canvas.width; blank.height=canvas.height;
-  if(canvas.toDataURL() === blank.toDataURL()){ alert('Por favor, firme antes de enviar'); return; }
-
-  const formData = new FormData(e.target);
-  formData.append('firma', canvas.toDataURL());
-
+  const blank=document.createElement('canvas'); blank.width=canvasR.width; blank.height=canvasR.height;
+  if(canvasR.toDataURL()===blank.toDataURL()){alert('Por favor, firme antes de enviar'); return;}
+  const formData=new FormData(e.target);
+  formData.append('firma',canvasR.toDataURL());
+  const url='TU_URL_APPS_SCRIPT';
   try{
-    const resp = await fetch(url, {method:'POST', body: formData});
-    const data = await resp.json();
-    if(data.status==='ok'){ alert('Formulario de recepción enviado!'); e.target.reset(); ctx.clearRect(0,0,canvas.width,canvas.height); document.getElementById('formRecepcion').style.display='none'; }
-    else alert('Error: '+data.message);
-  }catch(err){ alert('Error al enviar: '+err.message); }
+    const resp=await fetch(url,{method:'POST',body:formData});
+    const data=await resp.json();
+    if(data.status==='ok'){alert('Formulario de recepción enviado!'); e.target.reset(); ctxR.clearRect(0,0,canvasR.width,canvasR.height); setFechaHoyRecep();}
+    else{alert('Error: '+data.message);}
+  }catch(err){alert('Error al enviar: '+err.message);}
+};
+
+// Nubes
+for(let i=0;i<20;i++){
+  const cloud=document.createElement('div'); cloud.classList.add('cloud');
+  cloud.style.top=`${Math.random()*80}vh`; cloud.style.left=`${Math.random()*100}vw`;
+  document.body.appendChild(cloud);
 }
 </script>
 </body>
