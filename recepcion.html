@@ -61,7 +61,7 @@
 <script>
 // Cargar datos de limpieza
 async function cargarDatos(id){
-  const resp = await fetch('TU_URL_APPS_SCRIPT?id='+id);
+  const resp = await fetch('https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec?id='+id);
   const data = await resp.json();
   if(data.status==='ok'){
     const f = data.form;
@@ -106,7 +106,7 @@ document.getElementById('formRecepcion').onsubmit=async e=>{
   if(canvasR.toDataURL()===blank.toDataURL()){alert('Por favor, firme antes de enviar'); return;}
   const formData=new FormData(e.target);
   formData.append('firma',canvasR.toDataURL());
-  const url='TU_URL_APPS_SCRIPT';
+  const url='https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
   try{
     const resp=await fetch(url,{method:'POST',body:formData});
     const data=await resp.json();
