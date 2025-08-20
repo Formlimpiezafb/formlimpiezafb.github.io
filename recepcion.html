@@ -83,7 +83,14 @@ document.getElementById('clearFirma').onclick = () => { ctx.clearRect(0,0,canvas
 async function cargarFormularioPorId(id){
   try {
     let resp = await fetch(url + '?action=get&id=' + id);
-    let data = await resp.json();
+    let text = await resp.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      alert("Respuesta no es JSON: " + text);
+      return;
+    }
 
     if(data.status !== "ok"){
       alert(data.message || 'No se encontró formulario con ese ID');
@@ -149,7 +156,15 @@ document.getElementById('formRecepcion').onsubmit = async (e) => {
 
   try {
     const resp = await fetch(url, {method:'POST', body: formData});
-    const data = await resp.json();
+    let text = await resp.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      alert("Respuesta no es JSON: " + text);
+      return;
+    }
+
     if(data.status === 'ok'){
       mostrarPDF(data.pdfUrl || '');
       e.target.reset();
