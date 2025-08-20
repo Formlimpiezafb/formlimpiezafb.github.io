@@ -13,7 +13,6 @@
   button:hover { background-color: #e0a000; }
   input[readonly], textarea[readonly], select[disabled] { background: #eee; pointer-events: none; }
 
-  /* Modal PDF */
   #pdfModal { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:1000; }
   #pdfModal iframe { width:90%; height:90%; border:none; }
 </style>
@@ -35,8 +34,6 @@
 
   <label>Fecha recepción:<input type="date" name="fechaRecepcion" id="fechaRecepcion" required /></label>
   <label>Hora recepción:<input type="time" name="horaRecepcion" id="horaRecepcion" required /></label>
-  <label>Nombre receptor:<input type="text" name="nombreRecep" id="nombreRecep" required /></label>
-
   <label>¿Está conforme la limpieza?
     <select name="conforme" id="conforme" required>
       <option value="">Seleccione</option>
@@ -46,7 +43,7 @@
   </label>
   <label>Observaciones recepción:<textarea name="observacionesRecep" id="observacionesRecep" rows="3"></textarea></label>
 
-  <label>Firma (tocar o click y dibujar):</label>
+  <label>Firma (dibujar en el recuadro):</label>
   <canvas id="canvasFirma" width="400" height="150"></canvas>
   <button type="button" id="clearFirma">Limpiar Firma</button>
 
@@ -59,89 +56,57 @@
   <button type="submit">Enviar Recepción</button>
 </form>
 
-<!-- Modal PDF -->
 <div id="pdfModal" onclick="cerrarModal()">
   <iframe id="pdfFrame"></iframe>
 </div>
 
 <script>
-const url = 'https://script.google.com/macros/s/AKfycbxPbBI9IPRQNC1CLqrIIWkgmcAQ0QM-sDhw_ufQqDBmLXFQDXTivf8vY3UR2kr_BwAx/exec';
+const url = 'https://script.google.com/macros/s/AKfycbPbBI9IPRQNC1CLqrIIWkgmcAQ0QM-sDhw_ufQqDBmLXFQDXTivf8vY3UR2kr_BwAx/exec';
 
-// === Firma ===
 const canvas = document.getElementById('canvasFirma');
 const ctx = canvas.getContext('2d');
 let drawing = false;
 
+// --- Dibujo firma ---
 canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-canvas.addEventListener('mouseup', () => { drawing = false; });
-canvas.addEventListener('mouseout', () => { drawing = false; });
+canvas.addEventListener('mouseup', e => { drawing = false; });
+canvas.addEventListener('mouseout', e => { drawing = false; });
 canvas.addEventListener('mousemove', e => { if(drawing){ ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }});
-
-canvas.addEventListener('touchstart', e => {
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  ctx.beginPath();
-  ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
-  drawing = true;
-});
+canvas.addEventListener('touchstart', e => { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; ctx.beginPath(); ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top); drawing = true; });
 canvas.addEventListener('touchend', e => { e.preventDefault(); drawing = false; });
-canvas.addEventListener('touchmove', e => {
-  e.preventDefault();
-  if(!drawing) return;
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
-  ctx.stroke();
-});
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if(!drawing) return; const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top); ctx.stroke(); });
+document.getElementById('clearFirma').onclick = () => { ctx.clearRect(0,0,canvas.width,canvas.height); }
 
-document.getElementById('clearFirma').onclick = () => {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-};
-
-// === Cargar formulario por ID ===
+// --- Cargar formulario por ID ---
 async function cargarFormularioPorId(id){
   try {
     let resp = await fetch(url + '?action=get&id=' + id);
-    let text = await resp.text();
+    let data = await resp.json();
 
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      alert("Respuesta no es JSON: " + text);
-      return;
-    }
+    if(data.status !== "ok"){ alert(data.message || 'No se encontró formulario'); return; }
 
-    if(data.status !== "ok"){
-      alert(data.message || 'No se encontró formulario con ese ID');
-      return;
-    }
-
-    const formData = data.form; // fila completa
+    const formData = data.form;
 
     document.getElementById('formRecepcion').style.display = 'block';
     document.getElementById('formIdHidden').value = id;
 
-    // formData índices según tu hoja
     function formatFechaInput(fechaStr) {
       if(!fechaStr) return '';
       if(fechaStr.includes('/')) {
         const partes = fechaStr.split('/');
         return `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}`;
-      } else if(fechaStr.includes('-')) return fechaStr;
-      return '';
+      } else return fechaStr;
     }
-    function formatHoraInput(horaStr){ if(!horaStr) return ''; return horaStr.slice(0,5); }
+    function formatHoraInput(horaStr){ if(!horaStr) return ''; return horaStr.length>=5?horaStr.slice(0,5):''; }
 
-    document.getElementById('fecha').value = formatFechaInput(formData[1]);  
-    document.getElementById('matricula').value = formData[2];                
-    document.getElementById('posicion').value = formData[3];                 
-    document.getElementById('horaInicio').value = formatHoraInput(formData[4]); 
-    document.getElementById('horaFin').value = formatHoraInput(formData[5]);    
-    document.getElementById('tipoLimpieza').value = formData[6];           
-    document.getElementById('responsable').value = formData[7];              
-    document.getElementById('observaciones').value = formData[9];            
+    document.getElementById('fecha').value = formatFechaInput(formData[1]);
+    document.getElementById('matricula').value = formData[2];
+    document.getElementById('posicion').value = formData[3];
+    document.getElementById('horaInicio').value = formatHoraInput(formData[4]);
+    document.getElementById('horaFin').value = formatHoraInput(formData[5]);
+    document.getElementById('tipoLimpieza').value = formData[6];
+    document.getElementById('responsable').value = formData[7];
+    document.getElementById('observaciones').value = formData[9];
 
   } catch(err){ alert('Error al cargar datos: '+err.message); }
 }
@@ -152,53 +117,37 @@ window.onload = () => {
   else alert('No se recibió ID para cargar formulario');
 };
 
-// === Modal PDF ===
+// --- Modal PDF ---
 function mostrarPDF(url){
   const iframe = document.getElementById('pdfFrame');
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  iframe.src = match ? `https://drive.google.com/file/d/${match[1]}/preview` : url;
+  if(match) iframe.src = `https://drive.google.com/file/d/${match[1]}/preview`;
+  else iframe.src = url;
   document.getElementById('pdfModal').style.display = 'flex';
 }
-function cerrarModal(){
-  document.getElementById('pdfModal').style.display = 'none';
-  document.getElementById('pdfFrame').src = '';
-}
+function cerrarModal(){ document.getElementById('pdfModal').style.display = 'none'; document.getElementById('pdfFrame').src = ''; }
 
-// === Envío formulario ===
+// --- Envío del formulario ---
 document.getElementById('formRecepcion').onsubmit = async (e) => {
   e.preventDefault();
-
-  // Validar firma
   const blank = document.createElement('canvas');
   blank.width = canvas.width; blank.height = canvas.height;
-  if(canvas.toDataURL() === blank.toDataURL()){
-    alert('Por favor, firme antes de enviar');
-    return;
-  }
+  if(canvas.toDataURL() === blank.toDataURL()){ alert('Por favor, firme antes de enviar'); return; }
 
   const formData = new FormData(e.target);
   formData.set('firmaRecep', canvas.toDataURL());
 
   try {
     const resp = await fetch(url, {method:'POST', body: formData});
-    let text = await resp.text();
-
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      alert("Respuesta no es JSON: " + text);
-      return;
-    }
+    const data = await resp.json();
 
     if(data.status === 'ok'){
-      mostrarPDF(data.pdfUrl || '');
+      alert('Recepción guardada correctamente');
       e.target.reset();
       ctx.clearRect(0,0,canvas.width,canvas.height);
       document.getElementById('formRecepcion').style.display = 'none';
-    } else {
-      alert('Error: ' + data.message);
-    }
+    } else { alert('Error: '+data.message); }
+
   } catch(err){ alert('Error al enviar: '+err.message); }
 };
 </script>
