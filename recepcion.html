@@ -23,18 +23,20 @@
 
 <form id="formRecepcion" style="display:none;" enctype="multipart/form-data">
   <fieldset disabled>
-    <label>Fecha limpieza:<input type="date" name="fecha" id="fecha" readonly /></label>
-    <label>Matrícula:<input type="text" name="matricula" id="matricula" readonly /></label>
-    <label>Posición:<input type="text" name="posicion" id="posicion" readonly /></label>
-    <label>Hora Inicio:<input type="time" name="horaInicio" id="horaInicio" readonly /></label>
-    <label>Hora Fin:<input type="time" name="horaFin" id="horaFin" readonly /></label>
-    <label>Tipo de Limpieza:<input type="text" name="tipoLimpieza" id="tipoLimpieza" readonly /></label>
-    <label>Responsable limpieza:<input type="text" name="responsable" id="responsable" readonly /></label>
-    <label>Observaciones limpieza:<textarea name="observaciones" id="observaciones" rows="3" readonly></textarea></label>
+    <label>Fecha limpieza:<input type="date" id="fecha" readonly /></label>
+    <label>Matrícula:<input type="text" id="matricula" readonly /></label>
+    <label>Posición:<input type="text" id="posicion" readonly /></label>
+    <label>Hora Inicio:<input type="time" id="horaInicio" readonly /></label>
+    <label>Hora Fin:<input type="time" id="horaFin" readonly /></label>
+    <label>Tipo de Limpieza:<input type="text" id="tipoLimpieza" readonly /></label>
+    <label>Responsable limpieza:<input type="text" id="responsable" readonly /></label>
+    <label>Observaciones limpieza:<textarea id="observaciones" rows="3" readonly></textarea></label>
   </fieldset>
 
   <label>Fecha recepción:<input type="date" name="fechaRecepcion" id="fechaRecepcion" required /></label>
   <label>Hora recepción:<input type="time" name="horaRecepcion" id="horaRecepcion" required /></label>
+  <label>Nombre receptor:<input type="text" name="nombreRecep" id="nombreRecep" required /></label>
+
   <label>¿Está conforme la limpieza?
     <select name="conforme" id="conforme" required>
       <option value="">Seleccione</option>
@@ -63,27 +65,46 @@
 </div>
 
 <script>
-const url = 'https://script.google.com/macros/s/AKfycbw5EncQWBm3x3Zmzhv_BJo0ui_apq1pq1-hx7C9geLm9SQIB5oO3nn4zNrX9GW2aj6B/exec';
+const url = 'https://script.google.com/macros/s/AKfycbxPbBI9IPRQNC1CLqrIIWkgmcAQ0QM-sDhw_ufQqDBmLXFQDXTivf8vY3UR2kr_BwAx/exec';
 
+// === Firma ===
 const canvas = document.getElementById('canvasFirma');
 const ctx = canvas.getContext('2d');
 let drawing = false;
 
-// --- Manejo firma ---
 canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-canvas.addEventListener('mouseup', e => { drawing = false; });
-canvas.addEventListener('mouseout', e => { drawing = false; });
+canvas.addEventListener('mouseup', () => { drawing = false; });
+canvas.addEventListener('mouseout', () => { drawing = false; });
 canvas.addEventListener('mousemove', e => { if(drawing){ ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }});
-canvas.addEventListener('touchstart', e => { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; ctx.beginPath(); ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top); drawing = true; });
-canvas.addEventListener('touchend', e => { e.preventDefault(); drawing = false; });
-canvas.addEventListener('touchmove', e => { e.preventDefault(); if(!drawing) return; const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top); ctx.stroke(); });
-document.getElementById('clearFirma').onclick = () => { ctx.clearRect(0,0,canvas.width,canvas.height); }
 
-// --- Cargar formulario por ID ---
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0];
+  ctx.beginPath();
+  ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  drawing = true;
+});
+canvas.addEventListener('touchend', e => { e.preventDefault(); drawing = false; });
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if(!drawing) return;
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0];
+  ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  ctx.stroke();
+});
+
+document.getElementById('clearFirma').onclick = () => {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+};
+
+// === Cargar formulario por ID ===
 async function cargarFormularioPorId(id){
   try {
     let resp = await fetch(url + '?action=get&id=' + id);
     let text = await resp.text();
+
     let data;
     try {
       data = JSON.parse(text);
@@ -97,11 +118,12 @@ async function cargarFormularioPorId(id){
       return;
     }
 
-    const formData = data.form; // array con toda la fila
+    const formData = data.form; // fila completa
 
     document.getElementById('formRecepcion').style.display = 'block';
     document.getElementById('formIdHidden').value = id;
 
+    // formData índices según tu hoja
     function formatFechaInput(fechaStr) {
       if(!fechaStr) return '';
       if(fechaStr.includes('/')) {
@@ -110,17 +132,16 @@ async function cargarFormularioPorId(id){
       } else if(fechaStr.includes('-')) return fechaStr;
       return '';
     }
+    function formatHoraInput(horaStr){ if(!horaStr) return ''; return horaStr.slice(0,5); }
 
-    function formatHoraInput(horaStr){ if(!horaStr) return ''; return horaStr.length >=5 ? horaStr.slice(0,5):''; }
-
-    document.getElementById('fecha').value = formatFechaInput(formData[1]);   // Col B Fecha
-    document.getElementById('matricula').value = formData[2];                 // Col C Matrícula
-    document.getElementById('posicion').value = formData[3];                  // Col D Posición
-    document.getElementById('horaInicio').value = formatHoraInput(formData[4]); // Col E Hora Inicio
-    document.getElementById('horaFin').value = formatHoraInput(formData[5]);    // Col F Hora Fin
-    document.getElementById('tipoLimpieza').value = formData[6];              // Col G Tipo Limpieza
-    document.getElementById('responsable').value = formData[7];               // Col H Responsable
-    document.getElementById('observaciones').value = formData[9];             // Col J Observaciones
+    document.getElementById('fecha').value = formatFechaInput(formData[1]);  
+    document.getElementById('matricula').value = formData[2];                
+    document.getElementById('posicion').value = formData[3];                 
+    document.getElementById('horaInicio').value = formatHoraInput(formData[4]); 
+    document.getElementById('horaFin').value = formatHoraInput(formData[5]);    
+    document.getElementById('tipoLimpieza').value = formData[6];           
+    document.getElementById('responsable').value = formData[7];              
+    document.getElementById('observaciones').value = formData[9];            
 
   } catch(err){ alert('Error al cargar datos: '+err.message); }
 }
@@ -131,12 +152,11 @@ window.onload = () => {
   else alert('No se recibió ID para cargar formulario');
 };
 
-// --- Modal PDF ---
+// === Modal PDF ===
 function mostrarPDF(url){
   const iframe = document.getElementById('pdfFrame');
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if(match) iframe.src = `https://drive.google.com/file/d/${match[1]}/preview`;
-  else iframe.src = url;
+  iframe.src = match ? `https://drive.google.com/file/d/${match[1]}/preview` : url;
   document.getElementById('pdfModal').style.display = 'flex';
 }
 function cerrarModal(){
@@ -144,12 +164,17 @@ function cerrarModal(){
   document.getElementById('pdfFrame').src = '';
 }
 
-// --- Envío del formulario ---
+// === Envío formulario ===
 document.getElementById('formRecepcion').onsubmit = async (e) => {
   e.preventDefault();
+
+  // Validar firma
   const blank = document.createElement('canvas');
   blank.width = canvas.width; blank.height = canvas.height;
-  if(canvas.toDataURL() === blank.toDataURL()){ alert('Por favor, firme antes de enviar'); return; }
+  if(canvas.toDataURL() === blank.toDataURL()){
+    alert('Por favor, firme antes de enviar');
+    return;
+  }
 
   const formData = new FormData(e.target);
   formData.set('firmaRecep', canvas.toDataURL());
@@ -157,6 +182,7 @@ document.getElementById('formRecepcion').onsubmit = async (e) => {
   try {
     const resp = await fetch(url, {method:'POST', body: formData});
     let text = await resp.text();
+
     let data;
     try {
       data = JSON.parse(text);
