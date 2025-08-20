@@ -52,6 +52,7 @@
 
   <input type="hidden" name="id" id="formIdHidden" />
   <input type="hidden" name="formType" value="recepcion" />
+  <input type="hidden" name="firmaRecep" id="firmaRecep" />
 
   <button type="submit">Enviar Recepción</button>
 </form>
@@ -81,11 +82,16 @@ document.getElementById('clearFirma').onclick = () => { ctx.clearRect(0,0,canvas
 // --- Cargar formulario por ID ---
 async function cargarFormularioPorId(id){
   try {
-    let resp = await fetch(url + '?action=list');
+    let resp = await fetch(url + '?action=get&id=' + id);
     let data = await resp.json();
-    let pendientes = data.pendientes.concat(data.completados);
-    let formData = pendientes.find(f => f.ID === id);
-    if(!formData){ alert('No se encontró formulario con ese ID'); return; }
+
+    if(data.status !== "ok"){
+      alert(data.message || 'No se encontró formulario con ese ID');
+      return;
+    }
+
+    const formData = data.form; // array con toda la fila
+
     document.getElementById('formRecepcion').style.display = 'block';
     document.getElementById('formIdHidden').value = id;
 
@@ -100,14 +106,15 @@ async function cargarFormularioPorId(id){
 
     function formatHoraInput(horaStr){ if(!horaStr) return ''; return horaStr.length >=5 ? horaStr.slice(0,5):''; }
 
-    document.getElementById('fecha').value = formatFechaInput(formData.Fecha);
-    document.getElementById('horaInicio').value = formatHoraInput(formData['Hora Inicio']);
-    document.getElementById('horaFin').value = formatHoraInput(formData['Hora Fin']);
-    document.getElementById('matricula').value = formData.Matrícula;
-    document.getElementById('posicion').value = formData.Posición;
-    document.getElementById('tipoLimpieza').value = formData['Tipo Limpieza'];
-    document.getElementById('responsable').value = formData.Responsable;
-    document.getElementById('observaciones').value = formData.Observaciones;
+    document.getElementById('fecha').value = formatFechaInput(formData[1]);   // Col B Fecha
+    document.getElementById('matricula').value = formData[2];                 // Col C Matrícula
+    document.getElementById('posicion').value = formData[3];                  // Col D Posición
+    document.getElementById('horaInicio').value = formatHoraInput(formData[4]); // Col E Hora Inicio
+    document.getElementById('horaFin').value = formatHoraInput(formData[5]);    // Col F Hora Fin
+    document.getElementById('tipoLimpieza').value = formData[6];              // Col G Tipo Limpieza
+    document.getElementById('responsable').value = formData[7];               // Col H Responsable
+    document.getElementById('observaciones').value = formData[9];             // Col J Observaciones
+
   } catch(err){ alert('Error al cargar datos: '+err.message); }
 }
 
@@ -138,14 +145,13 @@ document.getElementById('formRecepcion').onsubmit = async (e) => {
   if(canvas.toDataURL() === blank.toDataURL()){ alert('Por favor, firme antes de enviar'); return; }
 
   const formData = new FormData(e.target);
-  formData.append('firma', canvas.toDataURL());
+  formData.set('firmaRecep', canvas.toDataURL());
 
   try {
     const resp = await fetch(url, {method:'POST', body: formData});
     const data = await resp.json();
     if(data.status === 'ok'){
-      // Mostrar PDF automáticamente
-      mostrarPDF(data.pdfUrl);
+      mostrarPDF(data.pdfUrl || '');
       e.target.reset();
       ctx.clearRect(0,0,canvas.width,canvas.height);
       document.getElementById('formRecepcion').style.display = 'none';
